@@ -1,0 +1,82 @@
+name: PR Quality Gates
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  quality:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8.15.5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Backend tests
+        run: pnpm --filter backend run test -- --passWithNoTests
+
+      - name: Crypto package tests
+        run: pnpm --filter @repo/crypto-utils run test -- --run --passWithNoTests
+
+      - name: Backend build
+        run: pnpm --filter backend build
+
+      - name: Frontend build
+        run: pnpm --filter frontend build
+
+  security-sensitive-review:
+    name: Security Sensitive Review
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect security-sensitive file changes
+        id: changes
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            sensitive:
+              - 'apps/backend/src/api/v1/auth/**'
+              - 'apps/frontend/src/lib/crypto.ts'
+              - 'packages/crypto-utils/**'
+              - 'apps/extension/**'
+
+      - name: Enforce security review acknowledgement
+        if: steps.changes.outputs.sensitive == 'true'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          echo "Security-sensitive files changed. Verifying PR acknowledgement..."
+          if echo "$PR_BODY" | grep -qi "Security-Review: approved"; then
+            echo "Security review acknowledgement found."
+            exit 0
+          fi
+          echo "Missing 'Security-Review: approved' in PR body for sensitive changes."
+          echo "Add the acknowledgement line to your PR description after review."
+          exit 1
+
+      - name: Skip gate when no sensitive changes
+        if: steps.changes.outputs.sensitive != 'true'
+        run: echo "No sensitive file changes detected."
