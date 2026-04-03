@@ -1,0 +1,108 @@
+
+Unused files
+-------------
+# Refactoring and Implementation Plan
+
+This plan outlines the work to be done to refactor the codebase, integrate unused utilities, and improve security based on the `knip` analysis. The work is divided into sequential phases.
+
+---
+
+### Phase 1: Local Storage and Database Refactoring
+
+**Goal**: Modernize the local storage layer by replacing raw IndexedDB calls with a dedicated abstraction.
+
+- **Task**: Migrate `apps/frontend/src/lib/storage.ts` to use the `apps/frontend/src/lib/indexed-db.ts` abstraction layer.
+- **Files to change**:
+    - `apps/frontend/src/lib/storage.ts`
+- **Steps**:
+    1.  **Import `IndexedDBService`**: In `storage.ts`, import the `dbService` instance from `../lib/indexed-db`.
+    2.  **Remove Database Initialization**: Delete the `initDatabase` and `getDatabase` functions.
+    3.  **Refactor `saveUserKeys`**: Replace the manual transaction with a call to `dbService.saveUserKeys()`.
+    4.  **Refactor `getUserKeys`**: Replace the manual transaction with a call to `dbService.getUserKeys()`.
+    5.  **Refactor `clearUserKeys`**: Replace the manual transaction with a call to `dbService.deleteUserKeys()`.
+    6.  **Refactor `saveSessionData`**: Replace the manual transaction with a call to `dbService.setSessionData()`.
+    7.  **Refactor `getSessionData`**: Replace the manual transaction with a call to `dbService.getSessionData()`.
+    8.  **Refactor `clearSessionData`**: Replace the manual transaction with a call to `dbService.clearSessionData()`.
+    9.  **Refactor `clearAllStorage`**: Replace individual clear calls with a single call to `dbService.clearAllData()`.
+    10. **Remove Unused Code**: Delete the now-unused database constants from `storage.ts`.
+
+---
+
+### Phase 2: UI Component and Styling Refactoring
+
+**Goal**: Improve code consistency and maintainability by using shared styles and utilities in UI components.
+
+- **Task 1**: Refactor hardcoded badge colors to use the shared `roleBadgeColors` from `vars.ts`.
+- **Files to change**:
+    - `apps/frontend/src/components/vault-settings-panel/css.ts`
+    - `apps/frontend/src/components/remove-member-dialog/css.ts`
+- **Steps**:
+    1.  In both `css.ts` files, import `roleBadgeColors` from `../../common/css/vars`.
+    2.  In the `roleBadge` style recipe, replace the hardcoded `background` and `color` values for `owner`, `manager`, and `member` variants with the corresponding values from the `roleBadgeColors` object.
+
+- **Task 2**: Refactor `PasswordGenerator` to use the shared `generatePassword` utility.
+- **Files to change**:
+    - `apps/frontend/src/components/password-generator/hooks.ts`
+- **Steps**:
+    1.  Import `generatePassword` from `../../../utils/password-utils`.
+    2.  In the `handleGenerate` function, replace the inline password generation logic with a single call to `generatePassword`, passing the component's options.
+    3.  Update the component's state with the newly generated password.
+
+---
+
+### Phase 3: Security Enhancements
+
+**Goal**: Strengthen application security by implementing secure memory and clipboard handling.
+
+- **Task 1**: Enhance security by clearing the decrypted private key from memory after use.
+- **Files to change**:
+    - `apps/frontend/src/services/session.service.ts`
+- **Steps**:
+    1.  Import `clearSensitiveData` from `../lib/crypto`.
+    2.  In the `clearPrivateKeyCache` method, call `clearSensitiveData(this.cachedPrivateKey)` before setting the cached key to `null`.
+
+- **Task 2**: Enhance security by replacing standard clipboard functionality with `copyToClipboardSecure`.
+- **Files to change**:
+    - `apps/frontend/src/components/password-detail-panel/hooks.ts`
+    - `apps/frontend/src/pages/vaults/vaults.hook.ts`
+- **Steps**:
+    1.  In both `hooks.ts` files, import the `copyToClipboardSecure` utility.
+    2.  In the `handleCopy` and `handleCopyToClipboard` functions, replace the `navigator.clipboard.writeText` call with `copyToClipboardSecure`.
+
+---
+
+### Phase 4: Authentication Flow Refactoring
+
+**Goal**: Standardize the authentication logic by using a dedicated mutation hook for logging out.
+
+- **Task**: Refactor the sign-out feature to use the proper `logout` service call.
+- **Files to change**:
+    - `apps/frontend/src/hooks/use-auth-mutations.hook.ts`
+    - `apps/frontend/src/components/vault-list-column/vault-list-column.hook.ts`
+- **Steps**:
+    1.  **Create `useLogoutMutation` hook**: In `use-auth-mutations.hook.ts`, create a new `useLogoutMutation` that calls `authService.logout`. On success, it should clear the query cache and redirect to the login page.
+    2.  **Refactor `handleSignOut`**: In `vault-list-column.hook.ts`, replace the body of `handleSignOut` with a call to the new `useLogoutMutation`.
+
+---
+
+### Phase 5: Shared Crypto Module Migration
+
+**Goal**: Centralize all cryptographic operations into a shared, reusable package (`@repo/crypto-utils`).
+
+- **Task**: Migrate cryptographic functions from `apps/frontend/src/lib/crypto.ts` to `packages/crypto-utils`.
+- **Sub-Phase 5.1: Setup**
+    1.  Create new source files (`primitives.ts`, `asymmetric.ts`, `symmetric.ts`, `signing.ts`, `key-io.ts`, `types.ts`) inside `packages/crypto-utils/src/`.
+    2.  Update `packages/crypto-utils/src/index.ts` to export from these new files.
+- **Sub-Phase 5.2: Migration**
+    1.  Move `CRYPTO_CONSTANTS`, `arrayBufferToBase64`, `base64ToArrayBuffer`, and `generateRandomBytes` to `primitives.ts`.
+    2.  Move key import/export functions (`importVaultKey`, `exportPrivateKey`, etc.) to `key-io.ts`.
+    3.  Move `decryptWithPrivateKey` to `asymmetric.ts`.
+    4.  Move `encryptSymmetricKey` to `symmetric.ts`.
+    5.  Move signing functions (`signPayload`, `verifySignature`, etc.) to `signing.ts`.
+- **Sub-Phase 5.3: Refactoring**
+    1.  Search the `apps/frontend` codebase for imports from `./lib/crypto.ts` and change them to point to `@repo/crypto-utils`.
+- **Sub-Phase 5.4: Cleanup**
+    1.  Delete the migrated functions from `apps/frontend/src/lib/crypto.ts`.
+    2.  Run `pnpm knip` to find and remove any newly unused code.
+    3.  Run the full test suite to ensure no regressions were introduced.
+

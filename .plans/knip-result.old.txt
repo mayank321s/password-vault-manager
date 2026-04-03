@@ -1,0 +1,105 @@
+
+Unused files
+-------------
+apps/frontend/src/lib/indexed-db.ts
+→ KEEP & WIRE UP: This is a proper IndexedDB abstraction layer that should replace the raw
+  IndexedDB calls currently scattered across storage.ts. Migrate all direct indexedDB.open /
+  objectStore usage in storage.ts to go through this file instead.
+
+
+Unused dependencies
+--------------------
+@repo/crypto-utils
+→ KEEP & MIGRATE: The plan is to move the low-level exported-but-unused crypto primitives from
+  apps/frontend/src/lib/crypto.ts into this shared package so both frontend and backend can import
+  from a single source. Until that migration happens, the package remains unused. Do not remove.
+
+
+Unused exports
+--------------------
+
+── vars.ts ──────────────────────────────────────────────────────────────────────────────────────
+roleBadgeColors  apps/frontend/src/common/css/vars.ts:65
+→ KEEP & WIRE UP: This token map (owner/manager/member colour pairs) is exactly what the role
+  badge spans in vault-settings-panel and remove-member-dialog should be using, but both files
+  currently hardcode the same RGBA values. Replace the hardcoded badge colours in those css.ts
+  files with `roleBadgeColors.owner`, `roleBadgeColors.manager`, `roleBadgeColors.member`.
+
+
+── crypto.ts ────────────────────────────────────────────────────────────────────────────────────
+CRYPTO_CONSTANTS  apps/frontend/src/lib/crypto.ts:25
+→ KEEP & MIGRATE: Centralised algorithm identifiers (AES-GCM, RSA-OAEP, key sizes). Referenced
+  internally throughout crypto.ts. Export it so the @repo/crypto-utils migration can consume the
+  same constants without redeclaring them.
+
+arrayBufferToBase64 / base64ToArrayBuffer  apps/frontend/src/lib/crypto.ts:61,68
+→ KEEP & MIGRATE: Core serialisation utilities used extensively within crypto.ts by other
+  exported functions. They are not currently called from outside the file only because callers
+  receive pre-converted strings, but they belong in @repo/crypto-utils as building blocks.
+
+generateRandomBytes  apps/frontend/src/lib/crypto.ts:75
+→ KEEP & MIGRATE: The canonical IV/salt generator used by every encryption function internally.
+  Keep exported so @repo/crypto-utils and future tests can import it directly.
+
+importVaultKey / encryptSymmetricKey
+  apps/frontend/src/lib/crypto.ts:107,147
+→ KEEP & MIGRATE: Vault-key lifecycle primitives. They are called by other exported functions in
+  the same file (encryptVaultKey, decryptVaultKey). Export them for @repo/crypto-utils and to
+  make the call graph testable in isolation.
+
+exportPrivateKey / importPrivateKey  apps/frontend/src/lib/crypto.ts:270,278
+→ KEEP & MIGRATE: RSA-OAEP key serialisation used by session persistence (encryptPrivateKey /
+  decryptPrivateKey below). Part of the @repo/crypto-utils migration surface.
+
+decryptWithPrivateKey  apps/frontend/src/lib/crypto.ts:314
+→ KEEP & MIGRATE: OAEP decryption primitive. Currently only called within crypto.ts by
+  decryptVaultKey. Export for @repo/crypto-utils and direct testability.
+
+importSigningPublicKey / exportSigningPrivateKey / importSigningPrivateKey
+  apps/frontend/src/lib/crypto.ts:365,388,398
+→ KEEP & MIGRATE: ECDSA signing-key lifecycle functions used by the account-recovery flow's
+  seed-phrase verification step. Part of the @repo/crypto-utils migration surface.
+
+signPayload / verifySignature  apps/frontend/src/lib/crypto.ts:419,441
+→ KEEP & MIGRATE: ECDSA sign/verify pair wired into the account-recovery verification flow.
+  Keep exported; move to @repo/crypto-utils when the package is set up.
+
+encryptPrivateKey / decryptPrivateKey  apps/frontend/src/lib/crypto.ts:596,614
+→ KEEP & MIGRATE: Session-persistence helpers that wrap the user's RSA private key under AES.
+  Called internally to protect key storage. Export for @repo/crypto-utils.
+
+prepareVaultKeyRotation  apps/frontend/src/lib/crypto.ts:643
+→ REMOVE: Superseded by buildReEncryptionPayload in vault.service.ts, which fetches passwords
+  and builds the full rotation request in one shot. This function is a lower-level remnant that
+  is never called from outside. Delete.
+
+clearSensitiveData / autoClearAfter  apps/frontend/src/lib/crypto.ts:775,793
+→ KEEP & WIRE UP: Memory hygiene utilities that zero out ArrayBuffers and schedule automatic
+  clearing after a timeout. They are not yet called anywhere. Wire them up in sessionManager
+  (session.service.ts) to clear decrypted private-key bytes after they are no longer needed
+  in memory.
+
+verifyRecoveryPayload  apps/frontend/src/lib/crypto.ts:1125
+→ KEEP & MIGRATE: Used by the account-recovery service to verify the ECDSA signature on the
+  seed-phrase payload. Export for @repo/crypto-utils.
+
+
+── auth.service.ts ──────────────────────────────────────────────────────────────────────────────
+logout  apps/frontend/src/services/auth.service.ts:808
+→ KEEP & WIRE UP: The logout function clears the session, revokes the refresh token server-side,
+  and wipes IndexedDB. It exists but is never called from the UI. Create a useLogout() mutation
+  hook in useAuthMutations.ts following the same pattern as useLoginMutation, then wire it to a
+  logout button in the app header/nav.
+
+
+── password-utils.ts ────────────────────────────────────────────────────────────────────────────
+generatePassword  apps/frontend/src/utils/password-utils.ts:54
+→ KEEP & WIRE UP: The PasswordGenerator component (src/components/password-generator/) renders
+  a generate button but currently uses its own inline logic. Replace that inline logic with this
+  function, which already handles charset selection and length options.
+
+copyToClipboardSecure  apps/frontend/src/utils/password-utils.ts:235
+→ KEEP & WIRE UP: A clipboard helper that schedules an automatic clear of the clipboard after
+  30 s, preventing sensitive values from persisting. Currently all copy actions use bare
+  navigator.clipboard.writeText. Wire this into handleCopy in password-detail-panel.hook.ts
+  and the vault dashboard's handleCopyToClipboard to replace the plain clipboard calls.

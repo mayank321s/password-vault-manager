@@ -1,0 +1,26 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "globalDependencies": ["**/.env.*local"],
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"],
+      "env": [
+        "JWT_SECRET",
+        "JWT_EXPIRATION",
+        "DATABASE_HOST",
+        "DATABASE_PORT",
+        "DATABASE_USER",
+        "DATABASE_PASSWORD",
+        "DATABASE_NAME",
+        "DATABASE_LOGGING"
+      ]
+    },
+    "test": {},
+    "test:e2e": {}
+  }
+}

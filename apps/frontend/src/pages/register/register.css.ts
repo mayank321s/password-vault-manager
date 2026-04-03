@@ -1,0 +1,451 @@
+/**
+ * Registration Page Styles (vanilla-extract)
+ */
+
+import { style } from '@vanilla-extract/css';
+
+// ============================================
+// Page Container
+// ============================================
+
+export const registerPage = style({
+  minHeight: '100vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '2rem 1rem',
+  color: '#e2e8f0',
+});
+
+export const registerContainer = style({
+  background: '#16213e',
+  borderRadius: '12px',
+  border: '1px solid #1e293b',
+  boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+  padding: '2rem',
+  maxWidth: '500px',
+  width: '100%',
+});
+
+// ============================================
+// Header
+// ============================================
+
+export const registerHeader = style({
+  textAlign: 'center',
+  marginBottom: '2rem',
+});
+
+// ============================================
+// Form
+// ============================================
+
+export const registerForm = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1.5rem',
+});
+
+export const formGroup = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.5rem',
+});
+
+export const warningBox = style({
+  background: 'rgba(251, 191, 36, 0.06)',
+  border: '2px solid rgba(251, 191, 36, 0.35)',
+  borderRadius: '8px',
+  padding: '1.5rem',
+  marginBottom: '1.5rem',
+  fontSize: '0.85rem',
+  textAlign: 'left',
+});
+
+// ============================================
+// Checkbox
+// ============================================
+
+export const checkboxLabel = style({
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: '0.75rem',
+  cursor: 'pointer',
+  fontWeight: 'normal',
+});
+
+// ============================================
+// Error Box
+// ============================================
+
+export const errorBox = style({
+  background: 'rgba(239, 68, 68, 0.08)',
+  border: '1px solid rgba(239, 68, 68, 0.3)',
+  borderRadius: '8px',
+  padding: '1rem',
+});
+
+export const btnSecondary = style({
+  background: 'transparent',
+  color: '#667eea',
+  border: '1px solid #667eea',
+  borderRadius: '8px',
+  padding: '0.75rem 1.5rem',
+  fontSize: '0.9rem',
+  fontWeight: 600,
+  cursor: 'pointer',
+  transition: 'all 0.2s ease',
+  selectors: {
+    '&:hover': {
+      background: 'rgba(102, 126, 234, 0.1)',
+      color: '#a5b4fc',
+      borderColor: '#a5b4fc',
+    },
+  },
+});
+
+export const formFooter = style({
+  textAlign: 'center',
+  color: '#64748b',
+  fontSize: '0.9rem',
+  marginTop: '1rem',
+});
+// ============================================
+// Progress Screen
+// ============================================
+
+export const progressContainer = style({
+  textAlign: 'center',
+  padding: '2rem 0',
+});
+
+export const progressStage = style({
+  color: '#667eea',
+  fontWeight: 600,
+  fontSize: '1.1rem',
+  marginBottom: '1.5rem',
+});
+
+export const progressBar = style({
+  width: '100%',
+  height: '12px',
+  background: '#1e293b',
+  borderRadius: '6px',
+  overflow: 'hidden',
+  marginBottom: '0.5rem',
+});
+
+export const progressFill = style({
+  height: '100%',
+  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+  transition: 'width 0.3s ease',
+});
+
+export const progressPercent = style({
+  fontSize: '1.5rem',
+  fontWeight: 700,
+  color: '#667eea',
+  margin: '1rem 0',
+});
+
+export const progressInfo = style({
+  color: '#64748b',
+  fontSize: '0.9rem',
+});
+
+// ============================================
+// Seed Phrase Screen
+// ============================================
+
+export const seedPhraseContainer = style({
+  textAlign: 'center',
+});
+
+export const seedPhraseBox = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)',
+  gap: '1rem',
+  marginBottom: '1.5rem',
+  padding: '1.5rem',
+  background: '#0f172a',
+  borderRadius: '8px',
+  border: '2px dashed #667eea',
+  '@media': {
+    '(max-width: 768px)': {
+      gridTemplateColumns: 'repeat(2, 1fr)',
+    },
+    '(max-width: 480px)': {
+      gridTemplateColumns: '1fr',
+    },
+  },
+});
+
+export const seedWord = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
+  padding: '0.75rem',
+  background: '#1e293b',
+  borderRadius: '6px',
+  border: '1px solid #334155',
+});
+
+export const seedWordNumber = style({
+  color: '#475569',
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  minWidth: '20px',
+});
+
+export const seedWordText = style({
+  color: '#e2e8f0',
+  fontWeight: 600,
+  fontSize: '0.95rem',
+});
+
+export const seedPhraseActions = style({
+  display: 'flex',
+  gap: '1rem',
+  marginBottom: '1.5rem',
+  justifyContent: 'center',
+  '@media': {
+    '(max-width: 768px)': {
+      flexDirection: 'column',
+    },
+  },
+});
+
+export const seedPhraseConfirm = style({
+  margin: '2rem 0',
+  textAlign: 'left',
+});
+
+// ============================================
+// Success Screen
+// ============================================
+
+export const successContainer = style({
+  textAlign: 'center',
+  padding: '3rem 0',
+});
+
+// ============================================
+// TOTP Setup Screen
+// ============================================
+
+export const totpContainer = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1.5rem',
+});
+
+export const totpHeader = style({
+  textAlign: 'center',
+});
+
+export const totpTitle = style({
+  color: '#e2e8f0',
+  marginBottom: '0.5rem',
+});
+
+export const totpSubtitle = style({
+  color: '#94a3b8',
+  fontSize: '0.9rem',
+  lineHeight: 1.5,
+  margin: 0,
+});
+
+export const totpSteps = style({
+  background: 'rgba(102, 126, 234, 0.06)',
+  border: '1px solid rgba(102, 126, 234, 0.2)',
+  borderRadius: '8px',
+  padding: '1rem 1rem 1rem 1.25rem',
+  textAlign: 'left',
+  margin: 0,
+  paddingLeft: '2.25rem',
+});
+
+export const totpStep = style({
+  color: '#94a3b8',
+  fontSize: '0.85rem',
+  lineHeight: 1.6,
+  marginBottom: '0.25rem',
+  selectors: {
+    '&:last-child': {
+      marginBottom: 0,
+    },
+  },
+});
+
+export const qrWrapper = style({
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '0.75rem',
+  background: '#0f172a',
+  borderRadius: '12px',
+  border: '2px solid #334155',
+  padding: '1.5rem',
+});
+
+export const qrImage = style({
+  width: '200px',
+  height: '200px',
+  borderRadius: '8px',
+  display: 'block',
+});
+
+export const qrCaption = style({
+  color: '#64748b',
+  fontSize: '0.8rem',
+  textAlign: 'center',
+  margin: 0,
+});
+
+export const divider = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '1rem',
+  color: '#475569',
+  fontSize: '0.8rem',
+  selectors: {
+    '&::before': {
+      content: '""',
+      flex: 1,
+      height: '1px',
+      background: '#1e293b',
+    },
+    '&::after': {
+      content: '""',
+      flex: 1,
+      height: '1px',
+      background: '#1e293b',
+    },
+  },
+});
+
+export const secretContainer = style({
+  background: '#0f172a',
+  borderRadius: '8px',
+  border: '1px solid #334155',
+  padding: '1rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.5rem',
+});
+
+export const secretLabel = style({
+  color: '#64748b',
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  textTransform: 'uppercase',
+  letterSpacing: '0.05em',
+  margin: 0,
+});
+
+export const secretCodeRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.75rem',
+});
+
+export const secretCode = style({
+  fontFamily: "'Courier New', Courier, monospace",
+  fontSize: '0.85rem',
+  color: '#a5b4fc',
+  letterSpacing: '0.1em',
+  wordBreak: 'break-all',
+  flex: 1,
+  margin: 0,
+});
+
+export const secretCopyButton = style({
+  background: 'transparent',
+  border: '1px solid #334155',
+  borderRadius: '6px',
+  color: '#667eea',
+  cursor: 'pointer',
+  fontSize: '0.75rem',
+  fontWeight: 600,
+  padding: '0.35rem 0.75rem',
+  transition: 'all 0.2s ease',
+  whiteSpace: 'nowrap',
+  flexShrink: 0,
+  selectors: {
+    '&:hover': {
+      background: 'rgba(102, 126, 234, 0.1)',
+      borderColor: '#667eea',
+    },
+  },
+});
+
+export const totpForm = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1rem',
+});
+
+export const totpInputLabel = style({
+  color: '#94a3b8',
+  fontSize: '0.9rem',
+  fontWeight: 600,
+  marginBottom: '0.25rem',
+  display: 'block',
+});
+
+export const totpInput = style({
+  width: '100%',
+  padding: '1rem',
+  background: '#1e293b',
+  border: '2px solid #334155',
+  borderRadius: '8px',
+  color: '#e2e8f0',
+  fontSize: '1.75rem',
+  fontWeight: 700,
+  letterSpacing: '0.5em',
+  textAlign: 'center',
+  fontFamily: "'Courier New', Courier, monospace",
+  boxSizing: 'border-box',
+  transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
+  selectors: {
+    '&:focus': {
+      outline: 'none',
+      borderColor: '#667eea',
+      boxShadow: '0 0 0 3px rgba(102, 126, 234, 0.2)',
+    },
+    '&::placeholder': {
+      color: '#334155',
+      letterSpacing: '0.25em',
+    },
+  },
+});
+
+export const totpInputHint = style({
+  color: '#475569',
+  fontSize: '0.8rem',
+  textAlign: 'center',
+  margin: 0,
+});
+
+export const totpActions = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.75rem',
+});
+
+export const btnGhost = style({
+  background: 'transparent',
+  border: 'none',
+  color: '#64748b',
+  cursor: 'pointer',
+  fontSize: '0.85rem',
+  padding: '0.5rem',
+  textAlign: 'center',
+  textDecoration: 'underline',
+  transition: 'color 0.2s ease',
+  selectors: {
+    '&:hover': {
+      color: '#94a3b8',
+    },
+  },
+});

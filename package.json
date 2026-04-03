@@ -1,0 +1,24 @@
+{
+  "name": "password-manager",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Zero-knowledge password manager with React and NestJS",
+  "author": "",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\""
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "prettier": "^3.2.5",
+    "turbo": "^2.8.10"
+  },
+  "packageManager": "pnpm@8.15.5",
+  "engines": {
+    "node": ">=22"
+  }
+}
