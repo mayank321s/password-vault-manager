@@ -96,7 +96,7 @@ Panels:
 2. Activation trend (daily and weekly)
 3. Autofill reliability by browser/platform
 4. Trial-to-paid conversion by plan
-5. Payment failures and cancelation trend
+5. Payment failures and cancellation trend
 
 ## 4) Ownership and operating cadence
 
