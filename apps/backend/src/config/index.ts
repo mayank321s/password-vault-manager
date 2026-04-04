@@ -2,5 +2,12 @@ import { appConfiguration } from './app.config';
 import { billingConfiguration } from './billing.config';
 import databaseConfig from './database.config';
 import { jwtConfiguration } from './jwt.config';
+import { ssoConfiguration } from './sso.config';
 
-export default [appConfiguration, billingConfiguration, databaseConfig, jwtConfiguration];
+export default [
+  appConfiguration,
+  billingConfiguration,
+  databaseConfig,
+  jwtConfiguration,
+  ssoConfiguration,
+];

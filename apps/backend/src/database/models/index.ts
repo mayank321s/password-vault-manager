@@ -19,6 +19,8 @@ import { VaultMember } from './vault-member.model';
 import { Vault } from './vault.model';
 import { Session } from './session.model';
 import { StripeWebhookEvent } from './stripe-webhook-event.model';
+import { SsoConfiguration, SsoProvider } from './sso-configuration.model';
+import { SsoVerifiedDomain } from './sso-verified-domain.model';
 
 export { User } from './user.model';
 export { Organization, OrganizationType } from './organization.model';
@@ -42,6 +44,8 @@ export {
   EmergencyAccessGrant,
   EmergencyAccessGrantStatus,
 } from './emergency-access-grant.model';
+export { SsoConfiguration, SsoProvider } from './sso-configuration.model';
+export { SsoVerifiedDomain } from './sso-verified-domain.model';
 export { OneTimeShare } from './one-time-share.model';
 export { Session } from './session.model';
 export { StripeWebhookEvent } from './stripe-webhook-event.model';
@@ -58,6 +62,8 @@ export const models = [
   Password,
   PasswordPermission,
   EmergencyAccessGrant,
+  SsoConfiguration,
+  SsoVerifiedDomain,
   OneTimeShare,
   Session,
   StripeWebhookEvent,
