@@ -85,7 +85,10 @@ async function persistOrganizationClaims(accessToken: string): Promise<void> {
       return;
     }
 
-    const claims = JSON.parse(atob(payload)) as JwtOrganizationClaims;
+    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const paddedPayload =
+      normalizedPayload + '='.repeat((4 - (normalizedPayload.length % 4)) % 4);
+    const claims = JSON.parse(atob(paddedPayload)) as JwtOrganizationClaims;
 
     if (claims.organizationId) {
       await saveSessionData('active_organization_id', claims.organizationId);

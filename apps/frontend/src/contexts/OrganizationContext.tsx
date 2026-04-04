@@ -40,7 +40,10 @@ function parseJwtClaims(token: string): JwtClaims {
       return {};
     }
 
-    const decoded = JSON.parse(atob(payload)) as JwtClaims;
+    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const paddedPayload =
+      normalizedPayload + '='.repeat((4 - (normalizedPayload.length % 4)) % 4);
+    const decoded = JSON.parse(atob(paddedPayload)) as JwtClaims;
     return decoded;
   } catch {
     return {};
