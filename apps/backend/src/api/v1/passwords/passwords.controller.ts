@@ -59,7 +59,11 @@ export class PasswordsController {
     @CurrentUser() user: CurrentUserData,
     @Body() createPasswordDto: CreatePasswordDto,
   ): Promise<PasswordResponseDto> {
-    return this.passwordsService.createPassword(user.userId, createPasswordDto);
+    return this.passwordsService.createPassword(
+      user.userId,
+      user.organizationId,
+      createPasswordDto,
+    );
   }
 
   /**
@@ -96,7 +100,11 @@ export class PasswordsController {
     @CurrentUser() user: CurrentUserData,
     @Param('passwordId') passwordId: string,
   ): Promise<PasswordResponseDto> {
-    return this.passwordsService.getPassword(user.userId, passwordId);
+    return this.passwordsService.getPassword(
+      user.userId,
+      user.organizationId,
+      passwordId,
+    );
   }
 
   /**
@@ -123,6 +131,7 @@ export class PasswordsController {
   ): Promise<PasswordResponseDto> {
     return this.passwordsService.updatePassword(
       user.userId,
+      user.organizationId,
       passwordId,
       updatePasswordDto,
     );
@@ -141,7 +150,11 @@ export class PasswordsController {
     @CurrentUser() user: CurrentUserData,
     @Param('passwordId') passwordId: string,
   ): Promise<{ success: boolean }> {
-    return this.passwordsService.deletePassword(user.userId, passwordId);
+    return this.passwordsService.deletePassword(
+      user.userId,
+      user.organizationId,
+      passwordId,
+    );
   }
 
   // ============================================
@@ -168,6 +181,7 @@ export class PasswordsController {
   ): Promise<PasswordPermissionResponseDto> {
     return this.passwordsService.grantPasswordPermission(
       user.userId,
+      user.organizationId,
       passwordId,
       grantPermissionDto,
     );
@@ -194,6 +208,7 @@ export class PasswordsController {
   ): Promise<PasswordPermissionResponseDto[]> {
     return this.passwordsService.listPasswordPermissions(
       user.userId,
+      user.organizationId,
       passwordId,
     );
   }
@@ -214,6 +229,7 @@ export class PasswordsController {
   ): Promise<{ success: boolean }> {
     return this.passwordsService.refreshPasswordShares(
       user.userId,
+      user.organizationId,
       passwordId,
       refreshSharesDto,
     );
@@ -234,6 +250,7 @@ export class PasswordsController {
   ): Promise<{ success: boolean }> {
     return this.passwordsService.revokePasswordPermission(
       user.userId,
+      user.organizationId,
       passwordId,
       targetUserId,
     );
@@ -260,6 +277,7 @@ export class PasswordsController {
   ): Promise<OneTimeShareResponseDto> {
     return this.passwordsService.createOneTimeShare(
       user.userId,
+      user.organizationId,
       passwordId,
       createShareDto,
     );

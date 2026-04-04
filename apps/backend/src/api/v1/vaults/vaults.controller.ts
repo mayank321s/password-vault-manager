@@ -48,7 +48,7 @@ export class VaultsController {
     @CurrentUser() user: CurrentUserData,
     @Body() request: CreateVaultRequestDto,
   ): Promise<VaultResponseDto> {
-    return this.vaultsService.createVault(user.userId, request);
+    return this.vaultsService.createVault(user.userId, user.organizationId, request);
   }
 
   /**
@@ -62,7 +62,7 @@ export class VaultsController {
   async getUserVaults(
     @CurrentUser() user: CurrentUserData,
   ): Promise<VaultResponseDto[]> {
-    return this.vaultsService.getUserVaults(user.userId);
+    return this.vaultsService.getUserVaults(user.userId, user.organizationId);
   }
 
   /**
@@ -77,7 +77,11 @@ export class VaultsController {
     @CurrentUser() user: CurrentUserData,
     @Param('vaultId') vaultId: string,
   ): Promise<VaultMemberResponseDto> {
-    return this.vaultsService.getVaultMembers(user.userId, vaultId);
+    return this.vaultsService.getVaultMembers(
+      user.userId,
+      user.organizationId,
+      vaultId,
+    );
   }
 
   /**
@@ -103,7 +107,12 @@ export class VaultsController {
     @Param('vaultId') vaultId: string,
     @Query() query: GetVaultPasswordsQueryDto,
   ): Promise<GetVaultPasswordsResponseDto> {
-    return this.vaultsService.getVaultPasswords(user.userId, vaultId, query);
+    return this.vaultsService.getVaultPasswords(
+      user.userId,
+      user.organizationId,
+      vaultId,
+      query,
+    );
   }
 
   /**
@@ -119,7 +128,12 @@ export class VaultsController {
     @Param('vaultId') vaultId: string,
     @Body() updateVaultDto: UpdateVaultRequestDto,
   ): Promise<{ success: true }> {
-    return this.vaultsService.updateVault(user.userId, vaultId, updateVaultDto);
+    return this.vaultsService.updateVault(
+      user.userId,
+      user.organizationId,
+      vaultId,
+      updateVaultDto,
+    );
   }
 
   /**
@@ -137,7 +151,11 @@ export class VaultsController {
     @CurrentUser() user: CurrentUserData,
     @Param('vaultId') vaultId: string,
   ): Promise<void> {
-    return this.vaultsService.deleteVault(user.userId, vaultId);
+    return this.vaultsService.deleteVault(
+      user.userId,
+      user.organizationId,
+      vaultId,
+    );
   }
 
   // ============================================
@@ -162,6 +180,7 @@ export class VaultsController {
   ): Promise<SuccessResponseDto> {
     return this.vaultsService.addVaultMember(
       user.userId,
+      user.organizationId,
       vaultId,
       addMemberDto,
     );
@@ -184,6 +203,7 @@ export class VaultsController {
   ): Promise<SuccessResponseDto> {
     return this.vaultsService.updateVaultMemberRole(
       user.userId,
+      user.organizationId,
       vaultId,
       memberId,
       updateRoleDto,
@@ -217,6 +237,7 @@ export class VaultsController {
   ): Promise<SuccessResponseDto> {
     return this.vaultsService.removeMemberWithReEncryption(
       user.userId,
+      user.organizationId,
       vaultId,
       memberId,
       request,
@@ -249,6 +270,7 @@ export class VaultsController {
   ): Promise<SuccessResponseDto> {
     return this.vaultsService.rotateVaultKeys(
       user.userId,
+      user.organizationId,
       vaultId,
       rotateKeysDto,
     );

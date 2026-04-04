@@ -25,6 +25,7 @@ export class PasswordRepository extends BaseRepository<Password> {
   async getVaultPasswords(
     vaultId: string,
     options: GetVaultPasswordsOptions,
+    organizationId?: string | null,
   ): Promise<{ rows: Password[]; count: number }> {
     const attributes: (keyof Attributes<Password>)[] = ['id', 'isNote', 'name'];
     if (options.withEncryptedData) {
@@ -33,6 +34,17 @@ export class PasswordRepository extends BaseRepository<Password> {
 
     return this.model.findAndCountAll({
       where: { vaultId },
+      include: organizationId
+        ? [
+            {
+              model: Vault,
+              as: 'vault',
+              where: { organizationId },
+              attributes: [],
+              required: true,
+            },
+          ]
+        : [],
       attributes,
       order: [['name', 'ASC']],
       limit: options.limit,
@@ -40,13 +52,19 @@ export class PasswordRepository extends BaseRepository<Password> {
     });
   }
 
-  async getPasswordDetails(id: string): Promise<Password | null> {
-    return this.model.findByPk(id, {
+  async getPasswordDetails(
+    id: string,
+    organizationId?: string | null,
+  ): Promise<Password | null> {
+    return this.model.findOne({
+      where: { id },
       include: [
         { model: User, as: 'creator', required: true },
         { model: User, as: 'updater', required: false },
         {
           model: Vault,
+          as: 'vault',
+          ...(organizationId ? { where: { organizationId } } : {}),
           include: [{ model: VaultMember, required: true }],
           required: true,
         },
@@ -58,6 +76,23 @@ export class PasswordRepository extends BaseRepository<Password> {
           ],
         },
       ],
+    });
+  }
+
+  async findByIdInOrganization(id: string, organizationId?: string | null) {
+    return this.model.findOne({
+      where: { id },
+      include: organizationId
+        ? [
+            {
+              model: Vault,
+              as: 'vault',
+              where: { organizationId },
+              attributes: [],
+              required: true,
+            },
+          ]
+        : [],
     });
   }
 }

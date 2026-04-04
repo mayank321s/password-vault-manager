@@ -48,6 +48,7 @@ export class VaultsService {
    */
   async createVault(
     userId: string,
+    organizationId: string | null,
     request: CreateVaultRequestDto,
   ): Promise<VaultResponseDto> {
     try {
@@ -57,6 +58,7 @@ export class VaultsService {
             name: request.name,
             isPersonalVault: false,
             ownerUserId: userId,
+            organizationId,
           },
           transaction,
         );
@@ -98,12 +100,17 @@ export class VaultsService {
    * Get all vaults where user is a member
    * Returns vault list with encrypted keys for decryption
    */
-  async getUserVaults(userId: string): Promise<VaultResponseDto[]> {
+  async getUserVaults(
+    userId: string,
+    organizationId: string | null,
+  ): Promise<VaultResponseDto[]> {
     try {
       // Find all vault memberships for the user
-      const vaultMembers = await this.vaultMemberRepository.findAllBy({
-        userId,
-      });
+      const vaultMembers =
+        await this.vaultMemberRepository.findAllByUserInOrganization(
+          userId,
+          organizationId,
+        );
 
       if (vaultMembers.length === 0) {
         return [];
@@ -115,6 +122,7 @@ export class VaultsService {
       // Fetch all vaults
       const vaults = await this.vaultRepository.findAllBy({
         id: { [Op.in]: vaultIds },
+        ...(organizationId ? { organizationId } : {}),
       });
 
       // Map vaults to response with encrypted keys
@@ -141,21 +149,27 @@ export class VaultsService {
    */
   async getVaultMembers(
     userId: string,
+    organizationId: string | null,
     vaultId: string,
   ): Promise<VaultMemberResponseDto> {
     try {
       // Verify user has access to this vault
-      const userMembership = await this.vaultMemberRepository.findOneBy({
-        vaultId,
-        userId,
-      });
+      const userMembership =
+        await this.vaultMemberRepository.findOneByVaultAndUser(
+          vaultId,
+          userId,
+          organizationId,
+        );
 
       if (!userMembership) {
         throw new ForbiddenException('You do not have access to this vault');
       }
 
       // Fetch vault with members
-      const vault = await this.vaultRepository.getVaultMembers(vaultId);
+      const vault = await this.vaultRepository.getVaultMembers(
+        vaultId,
+        organizationId,
+      );
 
       if (!vault) {
         throw new NotFoundException('Vault not found');
@@ -196,14 +210,17 @@ export class VaultsService {
    */
   async getVaultPasswords(
     userId: string,
+    organizationId: string | null,
     vaultId: string,
     query: GetVaultPasswordsQueryDto,
   ): Promise<GetVaultPasswordsResponseDto> {
     try {
-      const userMembership = await this.vaultMemberRepository.findOneBy({
-        vaultId,
-        userId,
-      });
+      const userMembership =
+        await this.vaultMemberRepository.findOneByVaultAndUser(
+          vaultId,
+          userId,
+          organizationId,
+        );
 
       if (!userMembership) {
         throw new ForbiddenException('You do not have access to this vault');
@@ -216,6 +233,7 @@ export class VaultsService {
           page: query.page,
           limit: query.limit,
         },
+        organizationId,
       );
 
       return {
@@ -247,12 +265,16 @@ export class VaultsService {
    */
   async updateVault(
     userId: string,
+    organizationId: string | null,
     vaultId: string,
     updateVaultDto: UpdateVaultRequestDto,
   ): Promise<{ success: true }> {
     try {
       // Get vault and verify ownership
-      const vault = await this.vaultRepository.findById(vaultId);
+      const vault = await this.vaultRepository.findByIdInOrganization(
+        vaultId,
+        organizationId,
+      );
 
       if (!vault) {
         throw new NotFoundException('Vault not found');
@@ -296,10 +318,17 @@ export class VaultsService {
    * - Cannot delete personal vault
    * - Cascade delete all passwords in vault
    */
-  async deleteVault(userId: string, vaultId: string): Promise<void> {
+  async deleteVault(
+    userId: string,
+    organizationId: string | null,
+    vaultId: string,
+  ): Promise<void> {
     try {
       // Get vault and verify ownership
-      const vault = await this.vaultRepository.findById(vaultId);
+      const vault = await this.vaultRepository.findByIdInOrganization(
+        vaultId,
+        organizationId,
+      );
 
       if (!vault) {
         throw new NotFoundException('Vault not found');
@@ -339,15 +368,18 @@ export class VaultsService {
    */
   async addVaultMember(
     userId: string,
+    organizationId: string | null,
     vaultId: string,
     request: AddVaultMemberRequestDto,
   ): Promise<SuccessResponseDto> {
     try {
       // Verify user has permission to add members (owner or manager)
-      const userMembership = await this.vaultMemberRepository.findOneBy({
-        vaultId,
-        userId,
-      });
+      const userMembership =
+        await this.vaultMemberRepository.findOneByVaultAndUser(
+          vaultId,
+          userId,
+          organizationId,
+        );
 
       if (!userMembership) {
         throw new ForbiddenException('You do not have access to this vault');
@@ -372,10 +404,12 @@ export class VaultsService {
       }
 
       // Check if user is already a member
-      const existingMembership = await this.vaultMemberRepository.findOneBy({
-        vaultId,
-        userId: newMember.id,
-      });
+      const existingMembership =
+        await this.vaultMemberRepository.findOneByVaultAndUser(
+          vaultId,
+          newMember.id,
+          organizationId,
+        );
 
       if (existingMembership) {
         throw new BadRequestException('User is already a member of this vault');
@@ -420,13 +454,17 @@ export class VaultsService {
    */
   async updateVaultMemberRole(
     userId: string,
+    organizationId: string | null,
     vaultId: string,
     memberId: string,
     request: UpdateVaultMemberRoleRequestDto,
   ): Promise<SuccessResponseDto> {
     try {
       // Verify vault ownership
-      const vault = await this.vaultRepository.findById(vaultId);
+      const vault = await this.vaultRepository.findByIdInOrganization(
+        vaultId,
+        organizationId,
+      );
 
       if (!vault) {
         throw new NotFoundException('Vault not found');
@@ -437,10 +475,11 @@ export class VaultsService {
       }
 
       // Get member
-      const member = await this.vaultMemberRepository.findOneBy({
+      const member = await this.vaultMemberRepository.findOneByVaultAndUser(
         vaultId,
-        userId: memberId,
-      });
+        memberId,
+        organizationId,
+      );
 
       if (!member) {
         throw new NotFoundException('Member not found in this vault');
@@ -460,7 +499,7 @@ export class VaultsService {
         );
       });
 
-      await this.vaultMemberRepository.getUser(vaultId, memberId);
+      await this.vaultMemberRepository.getUser(vaultId, memberId, organizationId);
 
       this.logger.debug('Vault member role updated', {
         vaultId,
@@ -488,15 +527,18 @@ export class VaultsService {
    */
   async removeVaultMember(
     userId: string,
+    organizationId: string | null,
     vaultId: string,
     memberId: string,
   ): Promise<void> {
     try {
       // Verify user has permission (owner or manager)
-      const userMembership = await this.vaultMemberRepository.findOneBy({
-        vaultId,
-        userId,
-      });
+      const userMembership =
+        await this.vaultMemberRepository.findOneByVaultAndUser(
+          vaultId,
+          userId,
+          organizationId,
+        );
 
       if (!userMembership) {
         throw new ForbiddenException('You do not have access to this vault');
@@ -512,10 +554,12 @@ export class VaultsService {
       }
 
       // Get member to remove
-      const memberToRemove = await this.vaultMemberRepository.findOneBy({
-        vaultId,
-        userId: memberId,
-      });
+      const memberToRemove =
+        await this.vaultMemberRepository.findOneByVaultAndUser(
+          vaultId,
+          memberId,
+          organizationId,
+        );
 
       if (!memberToRemove) {
         throw new NotFoundException('Member not found in this vault');
@@ -561,6 +605,7 @@ export class VaultsService {
    */
   async removeMemberWithReEncryption(
     userId: string,
+    organizationId: string | null,
     vaultId: string,
     memberId: string,
     request: RotateVaultKeysRequestDto,
@@ -571,10 +616,12 @@ export class VaultsService {
   }> {
     try {
       // Verify user has permission (owner or manager)
-      const userMembership = await this.vaultMemberRepository.findOneBy({
-        vaultId,
-        userId,
-      });
+      const userMembership =
+        await this.vaultMemberRepository.findOneByVaultAndUser(
+          vaultId,
+          userId,
+          organizationId,
+        );
 
       if (!userMembership) {
         throw new ForbiddenException('You do not have access to this vault');
@@ -590,10 +637,12 @@ export class VaultsService {
       }
 
       // Get member to remove
-      const memberToRemove = await this.vaultMemberRepository.findOneBy({
-        vaultId,
-        userId: memberId,
-      });
+      const memberToRemove =
+        await this.vaultMemberRepository.findOneByVaultAndUser(
+          vaultId,
+          memberId,
+          organizationId,
+        );
 
       if (!memberToRemove) {
         throw new NotFoundException('Member not found in this vault');
@@ -615,6 +664,7 @@ export class VaultsService {
         // Rotate vault keys for remaining members
         return this.performVaultKeyRotation(
           vaultId,
+          organizationId,
           request,
           transaction,
           memberId,
@@ -656,6 +706,7 @@ export class VaultsService {
    */
   async rotateVaultKeys(
     userId: string,
+    organizationId: string | null,
     vaultId: string,
     rotateKeysDto: RotateVaultKeysRequestDto,
   ): Promise<{
@@ -665,10 +716,12 @@ export class VaultsService {
   }> {
     try {
       // Verify user is vault owner or manager
-      const userMembership = await this.vaultMemberRepository.findOneBy({
-        vaultId,
-        userId,
-      });
+      const userMembership =
+        await this.vaultMemberRepository.findOneByVaultAndUser(
+          vaultId,
+          userId,
+          organizationId,
+        );
 
       if (!userMembership) {
         throw new ForbiddenException('You do not have access to this vault');
@@ -686,6 +739,7 @@ export class VaultsService {
       const result = await this.sequelize.transaction(async (transaction) => {
         return this.performVaultKeyRotation(
           vaultId,
+          organizationId,
           rotateKeysDto,
           transaction,
         );
@@ -715,6 +769,7 @@ export class VaultsService {
    */
   private async performVaultKeyRotation(
     vaultId: string,
+    organizationId: string | null,
     request: RotateVaultKeysRequestDto,
     transaction: Transaction,
     excludeMemberId?: string, // Optional member ID to exclude (used for removeMemberWithReEncryption)
@@ -724,9 +779,11 @@ export class VaultsService {
     membersUpdated: number;
   }> {
     // Get all current members (excluding the removed member if applicable)
-    let currentMembers = await this.vaultMemberRepository.findAllBy({
-      vaultId,
-    });
+    let currentMembers =
+      await this.vaultMemberRepository.findAllByVaultInOrganization(
+        vaultId,
+        organizationId,
+      );
 
     if (excludeMemberId) {
       currentMembers = currentMembers.filter(
