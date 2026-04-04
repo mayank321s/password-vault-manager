@@ -10,10 +10,12 @@ import {
   Vault,
   OrganizationPolicy,
   OrganizationSubscription,
+  Organization,
 } from 'src/database/models';
 import {
   OrganizationMemberRepository,
   OrganizationPolicyRepository,
+  OrganizationRepository,
   OrganizationSubscriptionRepository,
   PasswordRepository,
   VaultMemberRepository,
@@ -29,6 +31,7 @@ import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
 import { OrganizationRoleGuard } from 'src/common/guards/organization-role.guard';
 import { OrganizationPolicyGuard } from 'src/common/guards/organization-policy.guard';
 import { EntitlementGuard } from 'src/common/guards/entitlement.guard';
+import { FamilyRoleGuard } from 'src/common/guards/family-role.guard';
 
 /**
  * Passwords Module
@@ -54,6 +57,7 @@ import { EntitlementGuard } from 'src/common/guards/entitlement.guard';
       OneTimeShare,
       Vault,
       OrganizationMember,
+      Organization,
       OrganizationPolicy,
       OrganizationSubscription,
     ]),
@@ -69,10 +73,12 @@ import { EntitlementGuard } from 'src/common/guards/entitlement.guard';
     OneTimeShareRepository,
     VaultRepository,
     OrganizationMemberRepository,
+    OrganizationRepository,
     OrganizationPolicyRepository,
     OrganizationSubscriptionRepository,
     TenantAccessGuard,
     OrganizationRoleGuard,
+    FamilyRoleGuard,
     OrganizationPolicyGuard,
     EntitlementGuard,
   ],

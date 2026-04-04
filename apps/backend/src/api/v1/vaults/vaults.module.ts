@@ -2,6 +2,7 @@ import { Logger, Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import {
   OrganizationMember,
+  Organization,
   Password,
   User,
   Vault,
@@ -9,6 +10,7 @@ import {
 } from '../../../database/models';
 import {
   OrganizationMemberRepository,
+  OrganizationRepository,
   PasswordRepository,
   UsersRepository,
   VaultMemberRepository,
@@ -19,6 +21,7 @@ import { VaultsService } from './vaults.service';
 import { LoggerModule } from 'src/common/logger/logger.module';
 import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
 import { OrganizationRoleGuard } from 'src/common/guards/organization-role.guard';
+import { FamilyRoleGuard } from 'src/common/guards/family-role.guard';
 
 @Module({
   imports: [
@@ -28,6 +31,7 @@ import { OrganizationRoleGuard } from 'src/common/guards/organization-role.guard
       VaultMember,
       Password,
       OrganizationMember,
+      Organization,
     ]),
     LoggerModule,
   ],
@@ -39,8 +43,10 @@ import { OrganizationRoleGuard } from 'src/common/guards/organization-role.guard
     VaultMemberRepository,
     PasswordRepository,
     OrganizationMemberRepository,
+    OrganizationRepository,
     TenantAccessGuard,
     OrganizationRoleGuard,
+    FamilyRoleGuard,
   ],
   exports: [VaultsService],
 })

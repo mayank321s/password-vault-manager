@@ -3,12 +3,14 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import {
   Organization,
   OrganizationMember,
+  OrganizationPolicy,
   User,
   Vault,
   VaultMember,
 } from 'src/database/models';
 import {
   OrganizationMemberRepository,
+  OrganizationPolicyRepository,
   OrganizationRepository,
   UsersRepository,
   VaultMemberRepository,
@@ -22,6 +24,7 @@ import { FamilyService } from './family.service';
     SequelizeModule.forFeature([
       Organization,
       OrganizationMember,
+      OrganizationPolicy,
       User,
       Vault,
       VaultMember,
@@ -32,6 +35,7 @@ import { FamilyService } from './family.service';
     FamilyService,
     OrganizationRepository,
     OrganizationMemberRepository,
+    OrganizationPolicyRepository,
     UsersRepository,
     VaultRepository,
     VaultMemberRepository,
