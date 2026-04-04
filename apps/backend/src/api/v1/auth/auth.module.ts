@@ -5,6 +5,8 @@ import { PassportModule } from '@nestjs/passport';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { JwtConfig, jwtConfiguration } from 'src/config/jwt.config';
 import { TotpConfig, totpConfiguration } from 'src/config/totp.config';
+import { Organization } from '../../../database/models/organization.model';
+import { OrganizationMember } from '../../../database/models/organization-member.model';
 import { Session } from '../../../database/models/session.model';
 import { User } from '../../../database/models/user.model';
 import { VaultMember } from '../../../database/models/vault-member.model';
@@ -14,6 +16,7 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import {
+  OrganizationMemberRepository,
   SessionRepository,
   UsersRepository,
   VaultMemberRepository,
@@ -38,7 +41,14 @@ import { TotpService } from 'src/common/services/totp.service';
       },
     }),
     ConfigModule.forFeature(totpConfiguration),
-    SequelizeModule.forFeature([User, Vault, VaultMember, Session]),
+    SequelizeModule.forFeature([
+      User,
+      Vault,
+      VaultMember,
+      Session,
+      Organization,
+      OrganizationMember,
+    ]),
   ],
   controllers: [AuthController],
   providers: [
@@ -49,6 +59,7 @@ import { TotpService } from 'src/common/services/totp.service';
     VaultRepository,
     JwtConfig,
     VaultMemberRepository,
+    OrganizationMemberRepository,
     SessionRepository,
     TotpConfig,
     TotpService,

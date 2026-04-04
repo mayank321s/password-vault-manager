@@ -4,6 +4,8 @@ export interface CurrentUserData {
   userId: string;
   email: string;
   jwtTokenId: string;
+  organizationId: string | null;
+  organizationType: string | null;
 }
 
 export const CurrentUser = createParamDecorator(
