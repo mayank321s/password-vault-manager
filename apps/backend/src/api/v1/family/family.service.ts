@@ -13,6 +13,7 @@ import {
 } from 'src/database/models';
 import {
   OrganizationMemberRepository,
+  OrganizationPolicyRepository,
   OrganizationRepository,
   UsersRepository,
   VaultMemberRepository,
@@ -35,6 +36,7 @@ export class FamilyService {
     private readonly sequelize: Sequelize,
     private readonly organizationRepository: OrganizationRepository,
     private readonly organizationMemberRepository: OrganizationMemberRepository,
+    private readonly organizationPolicyRepository: OrganizationPolicyRepository,
     private readonly usersRepository: UsersRepository,
     private readonly vaultRepository: VaultRepository,
     private readonly vaultMemberRepository: VaultMemberRepository,
@@ -67,6 +69,18 @@ export class FamilyService {
           status: OrganizationMemberStatus.ACTIVE,
           invitedAt: new Date(),
           joinedAt: new Date(),
+        },
+        transaction,
+      );
+
+      await this.organizationPolicyRepository.create(
+        {
+          organizationId: organization.id,
+          requireMfa: false,
+          restrictExternalSharing: true,
+          sessionTimeoutMinutes: 30,
+          maxDevicesPerUser: 5,
+          policyVersion: 'family-baseline-v1',
         },
         transaction,
       );

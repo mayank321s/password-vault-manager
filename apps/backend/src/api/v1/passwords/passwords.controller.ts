@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import {
   CurrentUser,
+  RequireFamilyRoles,
   Public,
   RequireEntitlement,
   RequireOrgPolicy,
@@ -20,6 +21,7 @@ import {
 } from '../../../common/decorators';
 import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
 import { EntitlementGuard } from 'src/common/guards/entitlement.guard';
+import { FamilyRoleGuard } from 'src/common/guards/family-role.guard';
 import { OrganizationPolicyGuard } from 'src/common/guards/organization-policy.guard';
 import { OrganizationRoleGuard } from 'src/common/guards/organization-role.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -51,6 +53,7 @@ import { OrganizationMemberRole } from 'src/database/models';
   JwtAuthGuard,
   TenantAccessGuard,
   OrganizationRoleGuard,
+  FamilyRoleGuard,
   OrganizationPolicyGuard,
   EntitlementGuard,
 )
@@ -68,6 +71,7 @@ export class PasswordsController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @RequireFamilyRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADULT)
   @ZodResponse({ status: HttpStatus.CREATED, type: PasswordResponseDto })
   async createPassword(
     @CurrentUser() user: CurrentUserData,
@@ -137,6 +141,7 @@ export class PasswordsController {
    */
   @Patch(':passwordId')
   @HttpCode(HttpStatus.OK)
+  @RequireFamilyRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADULT)
   @ZodResponse({ status: HttpStatus.OK, type: PasswordResponseDto })
   async updatePassword(
     @CurrentUser() user: CurrentUserData,
@@ -160,6 +165,7 @@ export class PasswordsController {
    */
   @Delete(':passwordId')
   @HttpCode(HttpStatus.OK)
+  @RequireFamilyRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADULT)
   async deletePassword(
     @CurrentUser() user: CurrentUserData,
     @Param('passwordId') passwordId: string,
@@ -184,6 +190,7 @@ export class PasswordsController {
    */
   @Post(':passwordId/permissions')
   @HttpCode(HttpStatus.CREATED)
+  @RequireFamilyRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADULT)
   @RequireOrgRoles(
     OrganizationMemberRole.OWNER,
     OrganizationMemberRole.ADMIN,
@@ -241,6 +248,7 @@ export class PasswordsController {
    */
   @Patch(':passwordId/permissions')
   @HttpCode(HttpStatus.OK)
+  @RequireFamilyRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADULT)
   async refreshPasswordShares(
     @CurrentUser() user: CurrentUserData,
     @Param('passwordId') passwordId: string,
@@ -262,6 +270,7 @@ export class PasswordsController {
    */
   @Delete(':passwordId/permissions/:userId')
   @HttpCode(HttpStatus.OK)
+  @RequireFamilyRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADULT)
   @RequireOrgRoles(
     OrganizationMemberRole.OWNER,
     OrganizationMemberRole.ADMIN,
@@ -293,6 +302,7 @@ export class PasswordsController {
    */
   @Post(':passwordId/share')
   @HttpCode(HttpStatus.CREATED)
+  @RequireFamilyRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADULT)
   @RequireOrgRoles(
     OrganizationMemberRole.OWNER,
     OrganizationMemberRole.ADMIN,

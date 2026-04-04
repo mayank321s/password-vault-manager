@@ -13,10 +13,12 @@ import {
 } from '@nestjs/common';
 import {
   CurrentUser,
+  RequireFamilyRoles,
   RequireOrgRoles,
   type CurrentUserData,
 } from '../../../common/decorators';
 import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
+import { FamilyRoleGuard } from 'src/common/guards/family-role.guard';
 import { OrganizationRoleGuard } from 'src/common/guards/organization-role.guard';
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -36,7 +38,7 @@ import { VaultsService } from './vaults.service';
 import { OrganizationMemberRole } from 'src/database/models';
 
 @Controller()
-@UseGuards(JwtAuthGuard, TenantAccessGuard, OrganizationRoleGuard)
+@UseGuards(JwtAuthGuard, TenantAccessGuard, OrganizationRoleGuard, FamilyRoleGuard)
 export class VaultsController {
   constructor(private readonly vaultsService: VaultsService) {}
 
@@ -51,6 +53,7 @@ export class VaultsController {
    */
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @RequireFamilyRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADULT)
   async createVault(
     @CurrentUser() user: CurrentUserData,
     @Body() request: CreateVaultRequestDto,
@@ -130,6 +133,7 @@ export class VaultsController {
    */
   @Patch(':vaultId')
   @HttpCode(HttpStatus.OK)
+  @RequireFamilyRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADULT)
   async updateVault(
     @CurrentUser() user: CurrentUserData,
     @Param('vaultId') vaultId: string,
@@ -154,6 +158,7 @@ export class VaultsController {
    */
   @Delete(':vaultId')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @RequireFamilyRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADULT)
   async deleteVault(
     @CurrentUser() user: CurrentUserData,
     @Param('vaultId') vaultId: string,
@@ -180,6 +185,7 @@ export class VaultsController {
    */
   @Post(':vaultId/members')
   @HttpCode(HttpStatus.CREATED)
+  @RequireFamilyRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADULT)
   @RequireOrgRoles(
     OrganizationMemberRole.OWNER,
     OrganizationMemberRole.ADMIN,
@@ -207,6 +213,7 @@ export class VaultsController {
    */
   @Patch(':vaultId/members/:memberId')
   @HttpCode(HttpStatus.OK)
+  @RequireFamilyRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADULT)
   @RequireOrgRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADMIN)
   async updateVaultMemberRole(
     @CurrentUser() user: CurrentUserData,
@@ -242,6 +249,7 @@ export class VaultsController {
    */
   @Delete(':vaultId/members/:memberId')
   @HttpCode(HttpStatus.OK)
+  @RequireFamilyRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADULT)
   @RequireOrgRoles(
     OrganizationMemberRole.OWNER,
     OrganizationMemberRole.ADMIN,
@@ -281,6 +289,7 @@ export class VaultsController {
    */
   @Post(':vaultId/rotate-keys')
   @HttpCode(HttpStatus.OK)
+  @RequireFamilyRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADULT)
   @RequireOrgRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADMIN)
   async rotateVaultKeys(
     @CurrentUser() user: CurrentUserData,
