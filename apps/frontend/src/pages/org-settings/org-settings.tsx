@@ -88,11 +88,18 @@ export default function OrgSettingsPage() {
             </p>
           )}
           {section === 'family' && (
-            <p className={styles.sectionDescription} style={{ marginTop: '0.75rem' }}>
-              <Link to="/family/onboarding" className={styles.billingLink}>
-                Open family onboarding wizard
-              </Link>
-            </p>
+            <>
+              <p className={styles.sectionDescription} style={{ marginTop: '0.75rem' }}>
+                <Link to="/family/onboarding" className={styles.billingLink}>
+                  Open family onboarding wizard
+                </Link>
+              </p>
+              <p className={styles.sectionDescription} style={{ marginTop: '0.75rem' }}>
+                <Link to="/settings/emergency-access" className={styles.billingLink}>
+                  Manage emergency access
+                </Link>
+              </p>
+            </>
           )}
         </section>
       </div>

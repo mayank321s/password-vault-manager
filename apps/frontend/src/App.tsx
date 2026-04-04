@@ -26,6 +26,9 @@ const OrgSettingsPage = React.lazy(
 const FamilyOnboardingPage = React.lazy(
   () => import('./pages/family-onboarding/family-onboarding'),
 );
+const EmergencyAccessPage = React.lazy(
+  () => import('./pages/emergency-access/emergency-access'),
+);
 const ShareLinkViewPage = React.lazy(
   () => import('./pages/share-link-view/share-link-view'),
 );
@@ -109,6 +112,7 @@ function App() {
           element={<OrgSettingsPage />}
         />
         <Route path="/family/onboarding" element={<FamilyOnboardingPage />} />
+        <Route path="/settings/emergency-access" element={<EmergencyAccessPage />} />
         <Route
           path="/vaults/:vaultId/password/:passwordId"
           element={<VaultsPage />}
