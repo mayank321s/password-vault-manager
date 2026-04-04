@@ -38,6 +38,13 @@ export const OrganizationMemberStatus = {
   SUSPENDED: 'suspended',
 } as const;
 
+export const OrganizationMemberProvisionSource = {
+  SCIM: 'scim',
+} as const;
+
+export type OrganizationMemberProvisionSource =
+  (typeof OrganizationMemberProvisionSource)[keyof typeof OrganizationMemberProvisionSource];
+
 export type OrganizationMemberStatus =
   (typeof OrganizationMemberStatus)[keyof typeof OrganizationMemberStatus];
 
@@ -108,6 +115,20 @@ export class OrganizationMember extends Model<
     field: 'removed_at',
   })
   declare removedAt: Date | null;
+
+  @AllowNull(true)
+  @Column({
+    type: DataType.STRING(255),
+    field: 'scim_external_id',
+  })
+  declare scimExternalId: string | null;
+
+  @AllowNull(true)
+  @Column({
+    type: DataType.STRING(32),
+    field: 'provision_source',
+  })
+  declare provisionSource: OrganizationMemberProvisionSource | null;
 
   @BelongsTo(() => Organization, 'organizationId')
   declare organization: CreationOptional<Organization>;

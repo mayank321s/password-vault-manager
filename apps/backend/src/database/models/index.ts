@@ -26,6 +26,7 @@ export { User } from './user.model';
 export { Organization, OrganizationType } from './organization.model';
 export {
   OrganizationMember,
+  OrganizationMemberProvisionSource,
   OrganizationMemberRole,
   OrganizationMemberStatus,
 } from './organization-member.model';
