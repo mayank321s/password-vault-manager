@@ -9,8 +9,8 @@ interface JwtPayload {
   sub: string; // user ID
   email: string;
   jti: string; // JWT token ID
-  organizationId: string | null;
-  organizationType: OrganizationType | null;
+  organizationId?: string | null;
+  organizationType?: OrganizationType | null;
   purpose?: string; // present only on pre-auth tokens - must never pass this guard
   iat?: number;
   exp?: number;
@@ -56,8 +56,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       userId: payload.sub,
       email: payload.email,
       jwtTokenId: payload.jti,
-      organizationId: payload.organizationId,
-      organizationType: payload.organizationType,
+      organizationId: payload.organizationId ?? null,
+      organizationType: payload.organizationType ?? null,
     };
   }
 }
