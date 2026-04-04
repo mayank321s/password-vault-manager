@@ -87,19 +87,20 @@ export class OrganizationMember extends Model<
   declare status: OrganizationMemberStatus;
 
   @CreatedAt
-  @Column({
-    type: DataType.DATE,
-    field: 'joined_at',
-    defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
-  })
-  declare joinedAt: CreationOptional<Date>;
-
   @AllowNull(true)
   @Column({
     type: DataType.DATE,
-    field: 'invited_at',
+    field: 'joined_at',
   })
-  declare invitedAt: Date | null;
+  declare joinedAt: Date | null;
+
+  @AllowNull(false)
+  @Column({
+    type: DataType.DATE,
+    field: 'invited_at',
+    defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+  })
+  declare invitedAt: CreationOptional<Date>;
 
   @AllowNull(true)
   @Column({
@@ -114,4 +115,3 @@ export class OrganizationMember extends Model<
   @BelongsTo(() => User, 'userId')
   declare user: CreationOptional<User>;
 }
-

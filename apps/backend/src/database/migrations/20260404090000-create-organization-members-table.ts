@@ -42,12 +42,12 @@ export const up = async ({ context: queryInterface }: MigrationContext) => {
         },
         joined_at: {
           type: DataTypes.DATE,
-          allowNull: false,
-          defaultValue: literal('CURRENT_TIMESTAMP'),
+          allowNull: true,
         },
         invited_at: {
           type: DataTypes.DATE,
-          allowNull: true,
+          allowNull: false,
+          defaultValue: literal('CURRENT_TIMESTAMP'),
         },
         removed_at: {
           type: DataTypes.DATE,
@@ -114,4 +114,3 @@ export const down = async ({ context: queryInterface }: MigrationContext) => {
     await queryInterface.dropTable('organization_members', { transaction });
   });
 };
-
