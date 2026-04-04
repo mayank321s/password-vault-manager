@@ -41,4 +41,12 @@ export class UsersRepository extends BaseRepository<User> {
       subQuery: false,
     });
   }
+
+  findByEmail(email: string) {
+    return this.model.findOne({
+      where: {
+        email: email.toLowerCase().trim(),
+      },
+    });
+  }
 }
