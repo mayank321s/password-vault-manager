@@ -2,13 +2,16 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { JwtConfig } from 'src/config/jwt.config';
+import { OrganizationType } from 'src/database/models';
 import { AuthService } from '../auth.service';
 
 interface JwtPayload {
   sub: string; // user ID
   email: string;
   jti: string; // JWT token ID
-  purpose?: string; // present only on pre-auth tokens — must never pass this guard
+  organizationId: string | null;
+  organizationType: OrganizationType | null;
+  purpose?: string; // present only on pre-auth tokens - must never pass this guard
   iat?: number;
   exp?: number;
 }
@@ -27,7 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
-    // Reject pre-auth TOTP tokens unconditionally — they are single-purpose
+    // Reject pre-auth TOTP tokens unconditionally - they are single-purpose
     // and must never grant access to protected routes.
     if (payload.purpose === 'totp-login') {
       throw new UnauthorizedException('Invalid token');
@@ -53,6 +56,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       userId: payload.sub,
       email: payload.email,
       jwtTokenId: payload.jti,
+      organizationId: payload.organizationId,
+      organizationType: payload.organizationType,
     };
   }
 }

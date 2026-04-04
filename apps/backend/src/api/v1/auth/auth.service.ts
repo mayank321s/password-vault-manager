@@ -10,6 +10,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Sequelize } from 'sequelize-typescript';
 import {
+  OrganizationMemberRepository,
   SessionRepository,
   UsersRepository,
   VaultMemberRepository,
@@ -18,7 +19,11 @@ import {
 import { argon2Hash, argon2Verify } from 'src/utils/hashing.utils';
 import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
-import { User, VaultMemberRole } from '../../../database/models';
+import {
+  OrganizationType,
+  User,
+  VaultMemberRole,
+} from '../../../database/models';
 import {
   AuthResponseDto,
   CompleteRegistrationDto,
@@ -48,6 +53,7 @@ export class AuthService {
     private readonly sequelize: Sequelize,
     private readonly vaultRepository: VaultRepository,
     private readonly vaultMemberRepository: VaultMemberRepository,
+    private readonly organizationMemberRepository: OrganizationMemberRepository,
     private readonly sessionRepository: SessionRepository,
     private readonly jwtService: JwtService,
     private readonly totpService: TotpService,
@@ -797,12 +803,23 @@ export class AuthService {
    */
   private async generateTokenAndSession(
     user: User,
-  ): Promise<{ accessToken: string; jwtTokenId: string }> {
+  ): Promise<{
+    accessToken: string;
+    jwtTokenId: string;
+    organizationId: string | null;
+    organizationType: OrganizationType | null;
+  }> {
+    const organizationContext =
+      await this.organizationMemberRepository.findActiveMembershipWithOrganization(
+        user.id,
+      );
     const jwtTokenId = uuidv4();
     const payload = {
       sub: user.id,
       email: user.email,
       jti: jwtTokenId,
+      organizationId: organizationContext?.organizationId ?? null,
+      organizationType: organizationContext?.organization?.organizationType ?? null,
     };
 
     const accessToken = this.jwtService.sign(payload);
@@ -821,6 +838,11 @@ export class AuthService {
       );
     });
 
-    return { accessToken, jwtTokenId };
+    return {
+      accessToken,
+      jwtTokenId,
+      organizationId: payload.organizationId,
+      organizationType: payload.organizationType,
+    };
   }
 }
