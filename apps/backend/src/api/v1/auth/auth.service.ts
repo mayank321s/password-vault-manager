@@ -10,6 +10,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { Sequelize } from 'sequelize-typescript';
 import {
+  OrganizationRepository,
   OrganizationMemberRepository,
   SessionRepository,
   UsersRepository,
@@ -20,6 +21,8 @@ import { argon2Hash, argon2Verify } from 'src/utils/hashing.utils';
 import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
 import {
+  OrganizationMemberRole,
+  OrganizationMemberStatus,
   OrganizationType,
   User,
   VaultMemberRole,
@@ -53,6 +56,7 @@ export class AuthService {
     private readonly sequelize: Sequelize,
     private readonly vaultRepository: VaultRepository,
     private readonly vaultMemberRepository: VaultMemberRepository,
+    private readonly organizationRepository: OrganizationRepository,
     private readonly organizationMemberRepository: OrganizationMemberRepository,
     private readonly sessionRepository: SessionRepository,
     private readonly jwtService: JwtService,
@@ -159,9 +163,31 @@ export class AuthService {
 
         createdUserId = newUser.id;
 
+        const personalOrganization = await this.organizationRepository.create(
+          {
+            name: `${newUser.username}'s Personal Organization`,
+            organizationType: OrganizationType.PERSONAL,
+            createdByUserId: newUser.id,
+          },
+          transaction,
+        );
+
+        await this.organizationMemberRepository.create(
+          {
+            organizationId: personalOrganization.id,
+            userId: newUser.id,
+            role: OrganizationMemberRole.OWNER,
+            status: OrganizationMemberStatus.ACTIVE,
+            joinedAt: new Date(),
+            invitedAt: new Date(),
+          },
+          transaction,
+        );
+
         const personalVault = await this.vaultRepository.createPersonalVault(
           newUser.id,
           transaction,
+          personalOrganization.id,
         );
 
         await this.vaultMemberRepository.create(
