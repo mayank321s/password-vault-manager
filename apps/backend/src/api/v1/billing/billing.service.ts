@@ -4,6 +4,9 @@ import { BillingCatalog } from 'src/config/billing.config';
 import Stripe from 'stripe';
 import { CurrentUserData } from 'src/common/decorators';
 import { CreateCheckoutSessionRequestDto } from './dto';
+import { StripeWebhookEventRepository } from 'src/database/repositories';
+import { Sequelize } from 'sequelize-typescript';
+import { UniqueConstraintError } from 'sequelize';
 
 type BillingConfig = {
   stripeSecretKey: string;
@@ -20,6 +23,8 @@ export class BillingService {
 
   constructor(
     private readonly configService: ConfigService,
+    private readonly stripeWebhookEventRepository: StripeWebhookEventRepository,
+    private readonly sequelize: Sequelize,
   ) {
     const billing = this.configService.get<BillingConfig>('billing');
     if (!billing) {
@@ -84,6 +89,56 @@ export class BillingService {
       plan: payload.plan,
       interval: payload.interval,
     };
+  }
+
+  async handleWebhook(rawBody: Buffer | undefined, stripeSignature?: string) {
+    if (!stripeSignature || !rawBody) {
+      throw new BadRequestException('Missing Stripe signature or raw payload');
+    }
+
+    const billing = this.configService.get<BillingConfig>('billing');
+    if (!billing) {
+      throw new BadRequestException('Billing configuration is incomplete');
+    }
+
+    let event: Stripe.Event;
+    try {
+      event = this.stripe.webhooks.constructEvent(
+        rawBody,
+        stripeSignature,
+        billing.stripeWebhookSecret,
+      );
+    } catch {
+      throw new BadRequestException('Invalid Stripe webhook signature');
+    }
+
+    const alreadyProcessed = await this.stripeWebhookEventRepository.findOneBy({
+      stripeEventId: event.id,
+    });
+    if (alreadyProcessed) {
+      return { received: true, duplicate: true };
+    }
+
+    try {
+      await this.sequelize.transaction(async (transaction) => {
+        await this.stripeWebhookEventRepository.create(
+          {
+            stripeEventId: event.id,
+            eventType: event.type,
+            livemode: event.livemode,
+            payload: event as unknown as Record<string, unknown>,
+          },
+          transaction,
+        );
+      });
+    } catch (error) {
+      if (error instanceof UniqueConstraintError) {
+        return { received: true, duplicate: true };
+      }
+      throw error;
+    }
+
+    return { received: true, duplicate: false };
   }
 }
 

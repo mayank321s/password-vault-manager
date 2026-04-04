@@ -12,6 +12,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
     logger: ['warn', 'error'],
+    rawBody: true,
   });
   app.useLogger(await app.resolve(LoggingService));
 

@@ -1,6 +1,17 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Headers,
+  HttpCode,
+  HttpStatus,
+  Post,
+  RawBodyRequest,
+  Req,
+} from '@nestjs/common';
 import { ZodResponse } from 'nestjs-zod';
-import { CurrentUser, CurrentUserData } from 'src/common/decorators';
+import { CurrentUser, CurrentUserData, Public } from 'src/common/decorators';
+import { Request } from 'express';
 import { BillingService } from './billing.service';
 import {
   CreateCheckoutSessionRequestDto,
@@ -24,6 +35,16 @@ export class BillingController {
     @CurrentUser() user: CurrentUserData,
   ) {
     return this.billingService.createCheckoutSession(payload, user);
+  }
+
+  @Public()
+  @Post('webhook')
+  @HttpCode(HttpStatus.OK)
+  handleStripeWebhook(
+    @Req() req: RawBodyRequest<Request>,
+    @Headers('stripe-signature') stripeSignature?: string,
+  ) {
+    return this.billingService.handleWebhook(req.rawBody, stripeSignature);
   }
 }
 
