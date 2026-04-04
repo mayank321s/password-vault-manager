@@ -1,5 +1,6 @@
 import { RouterModule, Routes } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
+import { BillingModule } from './billing/billing.module';
 import { PasswordsModule } from './passwords/passwords.module';
 import { VaultsModule } from './vaults/vaults.module';
 import { UsersModule } from './users/users.module';
@@ -18,6 +19,7 @@ const API_V1_ROUTES: Routes = [
     children: [
       { path: 'health', module: HealthModule },
       { path: 'auth', module: AuthModule },
+      { path: 'billing', module: BillingModule },
       { path: 'passwords', module: PasswordsModule },
       { path: 'vaults', module: VaultsModule },
       { path: 'users', module: UsersModule },
@@ -29,6 +31,7 @@ const API_V1_ROUTES: Routes = [
   imports: [
     RouterModule.register(API_V1_ROUTES),
     AuthModule,
+    BillingModule,
     PasswordsModule,
     VaultsModule,
     UsersModule,
