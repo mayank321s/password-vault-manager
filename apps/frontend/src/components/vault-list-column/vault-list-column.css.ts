@@ -187,6 +187,39 @@ export const userBannerWrapper = style({
   flexShrink: 0,
 });
 
+export const organizationSwitcherWrapper = style({
+  padding: '0.5rem 1rem 0.75rem',
+  borderBottom: '1px solid #16213e',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.375rem',
+});
+
+export const organizationSwitcherLabel = style({
+  fontSize: '0.6875rem',
+  fontWeight: 700,
+  color: '#64748b',
+  letterSpacing: '0.08em',
+  textTransform: 'uppercase',
+});
+
+export const organizationSwitcher = style({
+  width: '100%',
+  borderRadius: '8px',
+  border: '1px solid #334155',
+  backgroundColor: '#0b1220',
+  color: '#e2e8f0',
+  padding: '0.5rem 0.625rem',
+  fontSize: '0.8125rem',
+  selectors: {
+    '&:focus': {
+      outline: 'none',
+      borderColor: '#667eea',
+      boxShadow: '0 0 0 2px rgba(102, 126, 234, 0.25)',
+    },
+  },
+});
+
 export const userBanner = style({
   display: 'flex',
   alignItems: 'center',

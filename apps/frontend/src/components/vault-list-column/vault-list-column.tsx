@@ -17,6 +17,7 @@ export default function VaultListColumn({
   onOpenSettings,
   onCreateVault,
   onRetry,
+  onOrganizationChanged,
 }: VaultListColumnProps) {
   const {
     userProfile,
@@ -25,7 +26,11 @@ export default function VaultListColumn({
     dropdownRef,
     handleToggleDropdown,
     handleSignOut,
-  } = useVaultListColumn();
+    activeOrganizationId,
+    organizationIds,
+    handleOrganizationChange,
+    isOrganizationSwitcherVisible,
+  } = useVaultListColumn(onOrganizationChanged);
 
   const avatarLetter = displayName
     ? displayName.charAt(0).toUpperCase()
@@ -70,6 +75,26 @@ export default function VaultListColumn({
           </div>
         )}
       </div>
+
+      {isOrganizationSwitcherVisible && (
+        <div className={styles.organizationSwitcherWrapper}>
+          <label className={styles.organizationSwitcherLabel} htmlFor="org-switcher">
+            Workspace
+          </label>
+          <select
+            id="org-switcher"
+            className={styles.organizationSwitcher}
+            value={activeOrganizationId ?? ''}
+            onChange={(e) => void handleOrganizationChange(e.target.value)}
+          >
+            {organizationIds.map((organizationId) => (
+              <option key={organizationId} value={organizationId}>
+                Org {organizationId.slice(0, 8)}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className={styles.vaultListHeader}>
         <div className={styles.vaultListTitle}>Vaults</div>
