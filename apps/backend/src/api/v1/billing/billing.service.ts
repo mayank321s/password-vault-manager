@@ -4,9 +4,17 @@ import { BillingCatalog } from 'src/config/billing.config';
 import Stripe from 'stripe';
 import { CurrentUserData } from 'src/common/decorators';
 import { CreateCheckoutSessionRequestDto } from './dto';
-import { StripeWebhookEventRepository } from 'src/database/repositories';
+import {
+  OrganizationSubscriptionRepository,
+  StripeWebhookEventRepository,
+} from 'src/database/repositories';
 import { Sequelize } from 'sequelize-typescript';
-import { UniqueConstraintError } from 'sequelize';
+import { Transaction, UniqueConstraintError } from 'sequelize';
+import {
+  SubscriptionBillingInterval,
+  SubscriptionLifecycleStatus,
+  SubscriptionPlanType,
+} from 'src/database/models';
 
 type BillingConfig = {
   stripeSecretKey: string;
@@ -24,6 +32,7 @@ export class BillingService {
   constructor(
     private readonly configService: ConfigService,
     private readonly stripeWebhookEventRepository: StripeWebhookEventRepository,
+    private readonly organizationSubscriptionRepository: OrganizationSubscriptionRepository,
     private readonly sequelize: Sequelize,
   ) {
     const billing = this.configService.get<BillingConfig>('billing');
@@ -91,6 +100,38 @@ export class BillingService {
     };
   }
 
+  async getCurrentSubscription(user: CurrentUserData) {
+    if (!user.organizationId) {
+      throw new BadRequestException('Organization context is required');
+    }
+
+    const subscription =
+      await this.organizationSubscriptionRepository.findOneBy({
+        organizationId: user.organizationId,
+      });
+
+    if (!subscription) {
+      throw new BadRequestException('No subscription found for organization');
+    }
+
+    return {
+      organizationId: subscription.organizationId,
+      stripeCustomerId: subscription.stripeCustomerId,
+      stripeSubscriptionId: subscription.stripeSubscriptionId,
+      stripePriceId: subscription.stripePriceId,
+      planType: subscription.planType,
+      billingInterval: subscription.billingInterval,
+      lifecycleStatus: subscription.lifecycleStatus,
+      trialEndsAt: subscription.trialEndsAt
+        ? subscription.trialEndsAt.toISOString()
+        : null,
+      currentPeriodEndAt: subscription.currentPeriodEndAt
+        ? subscription.currentPeriodEndAt.toISOString()
+        : null,
+      lastStripeEventId: subscription.lastStripeEventId,
+    };
+  }
+
   async handleWebhook(rawBody: Buffer | undefined, stripeSignature?: string) {
     if (!stripeSignature || !rawBody) {
       throw new BadRequestException('Missing Stripe signature or raw payload');
@@ -121,6 +162,8 @@ export class BillingService {
 
     try {
       await this.sequelize.transaction(async (transaction) => {
+        await this.processStripeEvent(event, transaction);
+
         await this.stripeWebhookEventRepository.create(
           {
             stripeEventId: event.id,
@@ -139,6 +182,180 @@ export class BillingService {
     }
 
     return { received: true, duplicate: false };
+  }
+
+  private async processStripeEvent(event: Stripe.Event, transaction: Transaction) {
+    switch (event.type) {
+      case 'checkout.session.completed':
+        await this.processCheckoutSessionCompleted(event, transaction);
+        return;
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated':
+      case 'customer.subscription.deleted':
+        await this.processCustomerSubscriptionEvent(event, transaction);
+        return;
+      case 'invoice.payment_failed':
+        await this.processInvoicePaymentFailed(event, transaction);
+        return;
+      case 'invoice.payment_succeeded':
+        await this.processInvoicePaymentSucceeded(event, transaction);
+        return;
+      default:
+        return;
+    }
+  }
+
+  private async processCheckoutSessionCompleted(
+    event: Stripe.Event,
+    transaction: Transaction,
+  ) {
+    const session = event.data.object as Stripe.Checkout.Session;
+    if (session.mode !== 'subscription' || !session.subscription) {
+      return;
+    }
+
+    const organizationId = session.metadata?.organizationId;
+    const plan = session.metadata?.plan as SubscriptionPlanType | undefined;
+    const interval =
+      session.metadata?.interval as SubscriptionBillingInterval | undefined;
+    const customerId =
+      typeof session.customer === 'string' ? session.customer : session.customer?.id;
+    const subscriptionId =
+      typeof session.subscription === 'string'
+        ? session.subscription
+        : session.subscription.id;
+
+    if (
+      !organizationId ||
+      !plan ||
+      !interval ||
+      !customerId ||
+      !subscriptionId
+    ) {
+      return;
+    }
+
+    const stripeSubscription =
+      await this.stripe.subscriptions.retrieve(subscriptionId);
+
+    await this.organizationSubscriptionRepository.upsertByOrganizationId(
+      organizationId,
+      {
+        stripeCustomerId: customerId,
+        stripeSubscriptionId: subscriptionId,
+        stripePriceId: stripeSubscription.items.data[0]?.price?.id ?? '',
+        planType: plan,
+        billingInterval: interval,
+        lifecycleStatus: this.mapStripeSubscriptionStatus(stripeSubscription.status),
+        trialEndsAt: stripeSubscription.trial_end
+          ? new Date(stripeSubscription.trial_end * 1000)
+          : null,
+        currentPeriodEndAt: stripeSubscription.items.data[0]?.current_period_end
+          ? new Date(stripeSubscription.items.data[0].current_period_end * 1000)
+          : null,
+        lastStripeEventId: event.id,
+      },
+      transaction,
+    );
+  }
+
+  private async processCustomerSubscriptionEvent(
+    event: Stripe.Event,
+    transaction: Transaction,
+  ) {
+    const subscription = event.data.object as Stripe.Subscription;
+    const subscriptionId = subscription.id;
+    const customerId =
+      typeof subscription.customer === 'string'
+        ? subscription.customer
+        : subscription.customer.id;
+
+    await this.organizationSubscriptionRepository.upsertByStripeSubscriptionId(
+      subscriptionId,
+      {
+        stripeCustomerId: customerId,
+        stripePriceId: subscription.items.data[0]?.price?.id ?? '',
+        lifecycleStatus: this.mapStripeSubscriptionStatus(subscription.status),
+        trialEndsAt: subscription.trial_end
+          ? new Date(subscription.trial_end * 1000)
+          : null,
+        currentPeriodEndAt: subscription.items.data[0]?.current_period_end
+          ? new Date(subscription.items.data[0].current_period_end * 1000)
+          : null,
+        lastStripeEventId: event.id,
+      },
+      transaction,
+    );
+  }
+
+  private async processInvoicePaymentFailed(
+    event: Stripe.Event,
+    transaction: Transaction,
+  ) {
+    const invoice = event.data.object as Stripe.Invoice;
+    const subscriptionParent = invoice.parent?.subscription_details?.subscription;
+    const subscriptionId =
+      typeof subscriptionParent === 'string'
+        ? subscriptionParent
+        : subscriptionParent?.id;
+    if (!subscriptionId) {
+      return;
+    }
+
+    await this.organizationSubscriptionRepository.upsertByStripeSubscriptionId(
+      subscriptionId,
+      {
+        lifecycleStatus: SubscriptionLifecycleStatus.FAILURE,
+        lastStripeEventId: event.id,
+      },
+      transaction,
+    );
+  }
+
+  private async processInvoicePaymentSucceeded(
+    event: Stripe.Event,
+    transaction: Transaction,
+  ) {
+    const invoice = event.data.object as Stripe.Invoice;
+    const subscriptionParent = invoice.parent?.subscription_details?.subscription;
+    const subscriptionId =
+      typeof subscriptionParent === 'string'
+        ? subscriptionParent
+        : subscriptionParent?.id;
+    if (!subscriptionId) {
+      return;
+    }
+
+    await this.organizationSubscriptionRepository.upsertByStripeSubscriptionId(
+      subscriptionId,
+      {
+        lifecycleStatus: SubscriptionLifecycleStatus.ACTIVE,
+        lastStripeEventId: event.id,
+      },
+      transaction,
+    );
+  }
+
+  private mapStripeSubscriptionStatus(
+    status: Stripe.Subscription.Status,
+  ): (typeof SubscriptionLifecycleStatus)[keyof typeof SubscriptionLifecycleStatus] {
+    switch (status) {
+      case 'trialing':
+        return SubscriptionLifecycleStatus.TRIAL;
+      case 'active':
+        return SubscriptionLifecycleStatus.ACTIVE;
+      case 'past_due':
+      case 'unpaid':
+      case 'paused':
+        return SubscriptionLifecycleStatus.GRACE;
+      case 'incomplete':
+      case 'incomplete_expired':
+        return SubscriptionLifecycleStatus.FAILURE;
+      case 'canceled':
+        return SubscriptionLifecycleStatus.CANCELED;
+      default:
+        return SubscriptionLifecycleStatus.ACTIVE;
+    }
   }
 }
 
