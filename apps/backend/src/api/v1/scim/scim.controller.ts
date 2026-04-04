@@ -11,102 +11,166 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { ZodResponse } from 'nestjs-zod';
-import { CurrentUser, CurrentUserData, RequireOrgRoles } from 'src/common/decorators';
+import {
+  CurrentScimContext,
+  CurrentScimContextData,
+  CurrentUser,
+  CurrentUserData,
+  RequireOrgRoles,
+} from 'src/common/decorators';
 import { OrganizationMemberRole } from 'src/database/models';
 import { OrganizationRoleGuard } from 'src/common/guards/organization-role.guard';
+import { ScimTokenAuthGuard } from 'src/common/guards/scim-token-auth.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
-  ScimCreateUserRequestDto,
+  CreateScimTokenRequestDto,
+  CreateScimTokenResponseDto,
+  ScimDiagnosticsDto,
   ScimGroupListResponseDto,
   ScimGroupResourceDto,
   ScimPatchGroupRequestDto,
   ScimPatchUserRequestDto,
+  ScimTokenResponseDto,
+  ScimTokenListResponseDto,
   ScimUpdateUserRequestDto,
   ScimUserListResponseDto,
   ScimUserResourceDto,
+  ScimCreateUserRequestDto,
 } from './dto';
 import { ScimService } from './scim.service';
+import { ScimAdminService } from './scim-admin.service';
 
-@Controller('v2')
-@UseGuards(JwtAuthGuard, OrganizationRoleGuard)
-@RequireOrgRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADMIN)
+@Controller()
 export class ScimController {
-  constructor(private readonly scimService: ScimService) {}
+  constructor(
+    private readonly scimService: ScimService,
+    private readonly scimAdminService: ScimAdminService,
+  ) {}
 
-  @Get('Users')
+  @Get('v2/Users')
+  @UseGuards(ScimTokenAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ZodResponse({ status: HttpStatus.OK, type: ScimUserListResponseDto })
-  listUsers(@CurrentUser() user: CurrentUserData) {
-    return this.scimService.listUsers(user);
+  listUsers(@CurrentScimContext() scimContext: CurrentScimContextData) {
+    return this.scimService.listUsers(scimContext);
   }
 
-  @Post('Users')
+  @Post('v2/Users')
+  @UseGuards(ScimTokenAuthGuard)
   @HttpCode(HttpStatus.CREATED)
   @ZodResponse({ status: HttpStatus.CREATED, type: ScimUserResourceDto })
   createUser(
-    @CurrentUser() user: CurrentUserData,
+    @CurrentScimContext() scimContext: CurrentScimContextData,
     @Body() payload: ScimCreateUserRequestDto,
   ) {
-    return this.scimService.createUser(user, payload);
+    return this.scimService.createUser(scimContext, payload);
   }
 
-  @Get('Users/:resourceId')
+  @Get('v2/Users/:resourceId')
+  @UseGuards(ScimTokenAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ZodResponse({ status: HttpStatus.OK, type: ScimUserResourceDto })
   getUser(
-    @CurrentUser() user: CurrentUserData,
+    @CurrentScimContext() scimContext: CurrentScimContextData,
     @Param('resourceId') resourceId: string,
   ) {
-    return this.scimService.getUser(user, resourceId);
+    return this.scimService.getUser(scimContext, resourceId);
   }
 
-  @Put('Users/:resourceId')
-  @HttpCode(HttpStatus.OK)
-  @ZodResponse({ status: HttpStatus.OK, type: ScimUserResourceDto })
-  updateUser(
-    @CurrentUser() user: CurrentUserData,
-    @Param('resourceId') resourceId: string,
-    @Body() payload: ScimUpdateUserRequestDto,
-  ) {
-    return this.scimService.updateUser(user, resourceId, payload);
-  }
-
-  @Patch('Users/:resourceId')
+  @Patch('v2/Users/:resourceId')
+  @UseGuards(ScimTokenAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ZodResponse({ status: HttpStatus.OK, type: ScimUserResourceDto })
   patchUser(
-    @CurrentUser() user: CurrentUserData,
+    @CurrentScimContext() scimContext: CurrentScimContextData,
     @Param('resourceId') resourceId: string,
     @Body() payload: ScimPatchUserRequestDto,
   ) {
-    return this.scimService.patchUser(user, resourceId, payload);
+    return this.scimService.patchUser(scimContext, resourceId, payload);
   }
 
-  @Get('Groups')
+  @Put('v2/Users/:resourceId')
+  @UseGuards(ScimTokenAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @ZodResponse({ status: HttpStatus.OK, type: ScimUserResourceDto })
+  updateUser(
+    @CurrentScimContext() scimContext: CurrentScimContextData,
+    @Param('resourceId') resourceId: string,
+    @Body() payload: ScimUpdateUserRequestDto,
+  ) {
+    return this.scimService.updateUser(scimContext, resourceId, payload);
+  }
+
+  @Get('v2/Groups')
+  @UseGuards(ScimTokenAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ZodResponse({ status: HttpStatus.OK, type: ScimGroupListResponseDto })
-  listGroups(@CurrentUser() user: CurrentUserData) {
-    return this.scimService.listGroups(user);
+  listGroups(@CurrentScimContext() scimContext: CurrentScimContextData) {
+    return this.scimService.listGroups(scimContext);
   }
 
-  @Get('Groups/:groupId')
+  @Get('v2/Groups/:groupId')
+  @UseGuards(ScimTokenAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ZodResponse({ status: HttpStatus.OK, type: ScimGroupResourceDto })
   getGroup(
-    @CurrentUser() user: CurrentUserData,
+    @CurrentScimContext() scimContext: CurrentScimContextData,
     @Param('groupId') groupId: string,
   ) {
-    return this.scimService.getGroup(user, groupId);
+    return this.scimService.getGroup(scimContext, groupId);
   }
 
-  @Patch('Groups/:groupId')
+  @Patch('v2/Groups/:groupId')
+  @UseGuards(ScimTokenAuthGuard)
   @HttpCode(HttpStatus.OK)
   @ZodResponse({ status: HttpStatus.OK, type: ScimGroupResourceDto })
   patchGroup(
-    @CurrentUser() user: CurrentUserData,
+    @CurrentScimContext() scimContext: CurrentScimContextData,
     @Param('groupId') groupId: string,
     @Body() payload: ScimPatchGroupRequestDto,
   ) {
-    return this.scimService.patchGroup(user, groupId, payload);
+    return this.scimService.patchGroup(scimContext, groupId, payload);
+  }
+
+  @Get('admin/tokens')
+  @UseGuards(JwtAuthGuard, OrganizationRoleGuard)
+  @RequireOrgRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ZodResponse({ status: HttpStatus.OK, type: ScimTokenListResponseDto })
+  async listTokens(@CurrentUser() user: CurrentUserData) {
+    return { tokens: await this.scimAdminService.listTokens(user) };
+  }
+
+  @Post('admin/tokens')
+  @UseGuards(JwtAuthGuard, OrganizationRoleGuard)
+  @RequireOrgRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADMIN)
+  @HttpCode(HttpStatus.CREATED)
+  @ZodResponse({ status: HttpStatus.CREATED, type: CreateScimTokenResponseDto })
+  createToken(
+    @CurrentUser() user: CurrentUserData,
+    @Body() payload: CreateScimTokenRequestDto,
+  ) {
+    return this.scimAdminService.createToken(user, payload);
+  }
+
+  @Patch('admin/tokens/:tokenId/revoke')
+  @UseGuards(JwtAuthGuard, OrganizationRoleGuard)
+  @RequireOrgRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ZodResponse({ status: HttpStatus.OK, type: ScimTokenResponseDto })
+  revokeToken(
+    @CurrentUser() user: CurrentUserData,
+    @Param('tokenId') tokenId: string,
+  ) {
+    return this.scimAdminService.revokeToken(user, tokenId);
+  }
+
+  @Get('admin/diagnostics')
+  @UseGuards(JwtAuthGuard, OrganizationRoleGuard)
+  @RequireOrgRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ZodResponse({ status: HttpStatus.OK, type: ScimDiagnosticsDto })
+  getDiagnostics(@CurrentUser() user: CurrentUserData) {
+    return this.scimAdminService.getDiagnostics(user);
   }
 }

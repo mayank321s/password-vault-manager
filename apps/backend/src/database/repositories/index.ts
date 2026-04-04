@@ -11,5 +11,7 @@ export * from './password-permission.repository';
 export * from './emergency-access-grant.repository';
 export * from './sso-configuration.repository';
 export * from './sso-verified-domain.repository';
+export * from './scim-token.repository';
+export * from './scim-provisioning-event.repository';
 export * from './one-time-share.repository';
 export * from './stripe-webhook-event.repository';

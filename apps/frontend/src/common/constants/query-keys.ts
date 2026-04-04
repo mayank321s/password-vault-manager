@@ -43,3 +43,11 @@ export const ssoKeys = {
   lookup: (email: string) => ['sso', 'lookup', email.toLowerCase().trim()] as const,
   callback: (code: string, state: string) => ['sso', 'callback', code, state] as const,
 };
+
+export const scimKeys = {
+  all: ['scim'] as const,
+  tokens: (organizationId: string | null) =>
+    ['scim', 'tokens', organizationId ?? 'none'] as const,
+  diagnostics: (organizationId: string | null) =>
+    ['scim', 'diagnostics', organizationId ?? 'none'] as const,
+};
