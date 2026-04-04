@@ -16,3 +16,11 @@ export const passwordKeys = {
     [...passwordKeys.all, passwordId, 'permissions'] as const,
   sharedWithMe: ['passwords', 'shared-with-me'] as const,
 };
+
+export const billingKeys = {
+  all: ['billing'] as const,
+  catalog: ['billing', 'catalog'] as const,
+  subscription: ['billing', 'subscription'] as const,
+  entitlements: ['billing', 'entitlements'] as const,
+  invoices: ['billing', 'invoices'] as const,
+};

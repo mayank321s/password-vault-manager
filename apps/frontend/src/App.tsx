@@ -16,6 +16,10 @@ const AccountRecoveryPage = React.lazy(
 const LoginPage = React.lazy(() => import('./pages/login/login'));
 const RegisterPage = React.lazy(() => import('./pages/register/register'));
 const VaultsPage = React.lazy(() => import('./pages/vaults/vault'));
+const PricingPage = React.lazy(() => import('./pages/pricing/pricing'));
+const BillingSettingsPage = React.lazy(
+  () => import('./pages/billing-settings/billing-settings'),
+);
 const OrgSettingsPage = React.lazy(
   () => import('./pages/org-settings/org-settings'),
 );
@@ -94,6 +98,8 @@ function App() {
         <Route path="/unlock" element={<UnlockPage />} />
         <Route path="/vaults" element={<VaultsPage />} />
         <Route path="/vaults/:vaultId" element={<VaultsPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/settings/billing" element={<BillingSettingsPage />} />
         <Route path="/settings/organization" element={<OrgSettingsPage />} />
         <Route
           path="/settings/organization/:section"

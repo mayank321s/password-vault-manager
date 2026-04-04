@@ -58,4 +58,12 @@ export const API_V1_ROUTES = {
     getPublicKey: (email: string) =>
       `${API_V1_PREFIX}/users/${encodeURIComponent(email)}/public-key`,
   },
+  billing: {
+    catalog: `${API_V1_PREFIX}/billing/catalog`,
+    checkoutSession: `${API_V1_PREFIX}/billing/checkout-session`,
+    subscription: `${API_V1_PREFIX}/billing/subscription`,
+    entitlements: `${API_V1_PREFIX}/billing/entitlements`,
+    invoices: `${API_V1_PREFIX}/billing/invoices`,
+    portalSession: `${API_V1_PREFIX}/billing/portal-session`,
+  },
 };

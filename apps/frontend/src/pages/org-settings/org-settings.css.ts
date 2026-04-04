@@ -78,3 +78,15 @@ export const sectionDescription = style({
   lineHeight: 1.5,
   fontSize: '0.925rem',
 });
+
+export const billingLink = style({
+  color: '#93c5fd',
+  textDecoration: 'none',
+  fontWeight: 600,
+  selectors: {
+    '&:hover': {
+      color: '#bfdbfe',
+      textDecoration: 'underline',
+    },
+  },
+});
