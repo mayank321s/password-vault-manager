@@ -1,0 +1,80 @@
+import { Link, Navigate, useParams } from 'react-router-dom';
+import { useMemo } from 'react';
+import * as styles from './org-settings.css';
+
+const sections = [
+  {
+    key: 'policy',
+    label: 'Policy',
+    title: 'Organization Policy Settings',
+    description:
+      'Configure organization-wide security controls such as MFA requirements, sharing restrictions, and session behavior.',
+  },
+  {
+    key: 'billing',
+    label: 'Billing',
+    title: 'Billing and Subscription Settings',
+    description:
+      'Manage plan details, upcoming renewals, invoices, and seat consumption for the active organization.',
+  },
+  {
+    key: 'identity',
+    label: 'Identity',
+    title: 'Identity and Access Settings',
+    description:
+      'Set up identity providers, role defaults, and other organization access controls in a single place.',
+  },
+] as const;
+
+type SectionKey = (typeof sections)[number]['key'];
+
+function isSectionKey(value: string | undefined): value is SectionKey {
+  return sections.some((section) => section.key === value);
+}
+
+export default function OrgSettingsPage() {
+  const { section } = useParams<{ section?: string }>();
+
+  if (!section) {
+    return <Navigate to="/settings/organization/policy" replace />;
+  }
+
+  if (!isSectionKey(section)) {
+    return <Navigate to="/404" replace />;
+  }
+
+  const currentSection = useMemo(
+    () => sections.find((entry) => entry.key === section)!,
+    [section],
+  );
+
+  return (
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <h1 className={styles.heading}>Organization Settings</h1>
+        <p className={styles.subheading}>
+          Centralized admin shell for policy, billing, and identity controls.
+        </p>
+
+        <nav className={styles.tabRow} aria-label="Organization settings sections">
+          {sections.map((entry) => (
+            <Link
+              key={entry.key}
+              to={`/settings/organization/${entry.key}`}
+              className={`${styles.tabButton} ${entry.key === section ? styles.tabButtonActive : ''}`}
+            >
+              {entry.label}
+            </Link>
+          ))}
+        </nav>
+
+        <section className={styles.sectionPanel}>
+          <h2 className={styles.sectionTitle}>{currentSection.title}</h2>
+          <p className={styles.sectionDescription}>
+            {currentSection.description}
+          </p>
+        </section>
+      </div>
+    </div>
+  );
+}
