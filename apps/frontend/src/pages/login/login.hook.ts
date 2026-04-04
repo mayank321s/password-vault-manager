@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { loginUser, loginWithTotp } from '../../services/auth.service';
+import { useSsoLookup, useStartSsoLogin } from '../../hooks/useSso';
 import { LoginFormData, LoginStep } from './types';
 
 export function useLoginPage() {
@@ -18,6 +19,14 @@ export function useLoginPage() {
   const [progress, setProgress] = useState({ stage: '', percent: 0 });
   const [progressTitle, setProgressTitle] = useState('Signing You In');
   const [totpCode, setTotpCode] = useState('');
+  const normalizedEmail = formData.email.toLowerCase().trim();
+  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+  const ssoLookupQuery = useSsoLookup(
+    normalizedEmail,
+    step === 'form' && isValidEmail,
+  );
+  const isSsoRequired = ssoLookupQuery.data?.requiresSso ?? false;
+  const startSsoLoginMutation = useStartSsoLogin();
 
   // ============================================
   // Step 1: Verify password
@@ -61,6 +70,17 @@ export function useLoginPage() {
     // TOTP errors render via loginWithTotpMutation.isError / .error
   });
 
+  const startSsoMutation = useMutation({
+    mutationFn: async (email: string) => {
+      setProgressTitle('Redirecting to Microsoft Entra');
+      setProgress({ stage: 'Preparing your organization sign-in route...', percent: 35 });
+      return startSsoLoginMutation.mutateAsync(email);
+    },
+    onSuccess: (result) => {
+      window.location.assign(result.redirectUrl);
+    },
+  });
+
   // ============================================
   // Form handlers
   // ============================================
@@ -72,7 +92,20 @@ export function useLoginPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.email.trim() || !formData.masterPassword) {
+    if (!formData.email.trim()) {
+      return;
+    }
+
+    if (isValidEmail && ssoLookupQuery.isFetching) {
+      return;
+    }
+
+    if (isSsoRequired) {
+      startSsoMutation.mutate(formData.email);
+      return;
+    }
+
+    if (!formData.masterPassword) {
       return;
     }
 
@@ -110,7 +143,9 @@ export function useLoginPage() {
   };
 
   const isProgressVisible =
-    loginMutation.isPending || loginWithTotpMutation.isPending;
+    loginMutation.isPending ||
+    loginWithTotpMutation.isPending ||
+    startSsoMutation.isPending;
 
   return {
     step,
@@ -119,7 +154,10 @@ export function useLoginPage() {
     progress,
     progressTitle,
     totpCode,
+    isSsoRequired,
     isProgressVisible,
+    ssoLookupQuery,
+    startSsoMutation,
     loginMutation,
     loginWithTotpMutation,
     handleInputChange,

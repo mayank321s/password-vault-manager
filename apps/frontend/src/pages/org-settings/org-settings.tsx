@@ -1,5 +1,7 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { useMemo } from 'react';
+import { useOrganizationContext } from '../../contexts/OrganizationContext';
+import { IdentitySettingsPanel } from './identity-settings-panel';
 import * as styles from './org-settings.css';
 
 const sections = [
@@ -41,6 +43,7 @@ function isSectionKey(value: string | undefined): value is SectionKey {
 
 export default function OrgSettingsPage() {
   const { section } = useParams<{ section?: string }>();
+  const { activeOrganizationType } = useOrganizationContext();
 
   if (!section) {
     return <Navigate to="/settings/organization/policy" replace />;
@@ -100,6 +103,11 @@ export default function OrgSettingsPage() {
                 </Link>
               </p>
             </>
+          )}
+          {section === 'identity' && (
+            <div className={styles.embeddedSection}>
+              <IdentitySettingsPanel organizationType={activeOrganizationType} />
+            </div>
           )}
         </section>
       </div>

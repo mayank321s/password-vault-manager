@@ -6,6 +6,12 @@ export const API_V1_ROUTES = {
     registerComplete: `${API_V1_PREFIX}/auth/register/complete`,
     login: `${API_V1_PREFIX}/auth/login`,
     loginTotp: `${API_V1_PREFIX}/auth/login/totp`,
+    ssoLookup: (email: string) =>
+      `${API_V1_PREFIX}/auth/sso/lookup?email=${encodeURIComponent(email)}`,
+    ssoStart: (email: string) =>
+      `${API_V1_PREFIX}/auth/sso/start?email=${encodeURIComponent(email)}`,
+    ssoCallback: (code: string, state: string) =>
+      `${API_V1_PREFIX}/auth/sso/callback?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`,
     getSalt: (email: string) => `${API_V1_PREFIX}/auth/salt?email=${email}`,
     getRecoveryData: (email: string) =>
       `${API_V1_PREFIX}/auth/recovery-data?email=${email}`,
@@ -82,5 +88,10 @@ export const API_V1_ROUTES = {
       `${API_V1_PREFIX}/emergency-access/grants/${grantId}/accept`,
     revoke: (grantId: string) =>
       `${API_V1_PREFIX}/emergency-access/grants/${grantId}`,
+  },
+  sso: {
+    current: `${API_V1_PREFIX}/sso/config/current`,
+    verifyDomain: (domainId: string) =>
+      `${API_V1_PREFIX}/sso/config/domains/${domainId}/verify`,
   },
 };

@@ -136,6 +136,36 @@ export const errorText = style({
   },
 });
 
+export const ssoCallout = style({
+  borderRadius: '12px',
+  border: '1px solid rgba(125, 211, 252, 0.24)',
+  background: 'rgba(8, 47, 73, 0.35)',
+  padding: '0.95rem 1rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.35rem',
+});
+
+export const ssoCalloutTitle = style({
+  margin: 0,
+  color: '#e0f2fe',
+  fontSize: '0.95rem',
+  fontWeight: 700,
+});
+
+export const ssoCalloutText = style({
+  margin: 0,
+  color: '#bae6fd',
+  fontSize: '0.85rem',
+  lineHeight: 1.5,
+});
+
+export const lookupHint = style({
+  color: '#93c5fd',
+  fontSize: '0.85rem',
+  textAlign: 'center',
+});
+
 // ============================================
 // Form Footer
 // ============================================

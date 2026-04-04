@@ -35,3 +35,10 @@ export const emergencyAccessKeys = {
   all: ['emergency-access'] as const,
   lists: ['emergency-access', 'list'] as const,
 };
+
+export const ssoKeys = {
+  all: ['sso'] as const,
+  configuration: ['sso', 'configuration'] as const,
+  lookup: (email: string) => ['sso', 'lookup', email.toLowerCase().trim()] as const,
+  callback: (code: string, state: string) => ['sso', 'callback', code, state] as const,
+};

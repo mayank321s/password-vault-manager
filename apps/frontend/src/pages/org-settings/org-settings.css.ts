@@ -63,6 +63,9 @@ export const sectionPanel = style({
   borderRadius: '14px',
   backgroundColor: '#111827',
   padding: '1.25rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1rem',
 });
 
 export const sectionTitle = style({
@@ -89,4 +92,209 @@ export const billingLink = style({
       textDecoration: 'underline',
     },
   },
+});
+
+export const embeddedSection = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1rem',
+});
+
+export const identityLayout = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+  gap: '1rem',
+});
+
+export const calloutCard = style({
+  borderRadius: '16px',
+  border: '1px solid #1e293b',
+  backgroundColor: '#0f172a',
+  padding: '1rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.9rem',
+});
+
+export const calloutTitle = style({
+  margin: 0,
+  color: '#f8fafc',
+  fontSize: '1rem',
+  fontWeight: 700,
+});
+
+export const identityForm = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.75rem',
+});
+
+export const fieldLabel = style({
+  color: '#cbd5e1',
+  fontSize: '0.85rem',
+  fontWeight: 600,
+});
+
+export const fieldInput = style({
+  minHeight: '44px',
+  borderRadius: '12px',
+  border: '1px solid #334155',
+  backgroundColor: '#111827',
+  color: '#e2e8f0',
+  padding: '0.75rem 0.9rem',
+  selectors: {
+    '&:focus': {
+      outline: 'none',
+      borderColor: '#7dd3fc',
+      boxShadow: '0 0 0 3px rgba(125, 211, 252, 0.16)',
+    },
+  },
+});
+
+export const primaryButton = style({
+  minHeight: '44px',
+  border: 'none',
+  borderRadius: '12px',
+  backgroundColor: '#7dd3fc',
+  color: '#082f49',
+  fontWeight: 700,
+  cursor: 'pointer',
+});
+
+export const secondaryButton = style({
+  minHeight: '44px',
+  border: '1px solid #334155',
+  borderRadius: '12px',
+  backgroundColor: '#111827',
+  color: '#e2e8f0',
+  fontWeight: 700,
+  cursor: 'pointer',
+  padding: '0.75rem 1rem',
+});
+
+export const statusGrid = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+  gap: '0.75rem',
+});
+
+export const statusCard = style({
+  borderRadius: '14px',
+  border: '1px solid #1e293b',
+  backgroundColor: '#111827',
+  padding: '0.9rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.35rem',
+});
+
+export const statusLabel = style({
+  color: '#94a3b8',
+  fontSize: '0.75rem',
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em',
+});
+
+export const statusValue = style({
+  color: '#f8fafc',
+  fontSize: '0.95rem',
+  wordBreak: 'break-word',
+});
+
+export const domainList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.75rem',
+});
+
+export const domainCard = style({
+  borderRadius: '14px',
+  border: '1px solid #1e293b',
+  backgroundColor: '#111827',
+  padding: '0.9rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.6rem',
+});
+
+export const domainHeader = style({
+  display: 'flex',
+  justifyContent: 'space-between',
+  gap: '0.75rem',
+  alignItems: 'flex-start',
+  flexWrap: 'wrap',
+});
+
+export const domainTitle = style({
+  margin: 0,
+  color: '#f8fafc',
+  fontSize: '0.95rem',
+  fontWeight: 700,
+});
+
+export const domainMeta = style({
+  margin: 0,
+  color: '#94a3b8',
+  fontSize: '0.825rem',
+  lineHeight: 1.5,
+});
+
+export const domainBadgePending = style({
+  borderRadius: '999px',
+  backgroundColor: 'rgba(251, 191, 36, 0.14)',
+  color: '#fcd34d',
+  padding: '0.3rem 0.7rem',
+  fontSize: '0.75rem',
+  fontWeight: 700,
+});
+
+export const domainBadgeVerified = style({
+  borderRadius: '999px',
+  backgroundColor: 'rgba(74, 222, 128, 0.14)',
+  color: '#86efac',
+  padding: '0.3rem 0.7rem',
+  fontSize: '0.75rem',
+  fontWeight: 700,
+});
+
+export const tokenLabel = style({
+  margin: 0,
+  color: '#cbd5e1',
+  fontSize: '0.78rem',
+  fontWeight: 700,
+});
+
+export const tokenValue = style({
+  display: 'block',
+  borderRadius: '12px',
+  backgroundColor: '#020617',
+  color: '#7dd3fc',
+  padding: '0.75rem',
+  border: '1px solid #1e293b',
+  overflowWrap: 'anywhere',
+});
+
+export const verifyRow = style({
+  display: 'grid',
+  gridTemplateColumns: '1fr auto',
+  gap: '0.75rem',
+  '@media': {
+    '(max-width: 720px)': {
+      gridTemplateColumns: '1fr',
+    },
+  },
+});
+
+export const successText = style({
+  margin: 0,
+  color: '#86efac',
+  fontSize: '0.9rem',
+  lineHeight: 1.5,
+});
+
+export const errorText = style({
+  margin: 0,
+  color: '#fca5a5',
+  fontSize: '0.9rem',
+  lineHeight: 1.5,
 });
