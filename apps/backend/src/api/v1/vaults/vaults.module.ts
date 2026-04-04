@@ -1,7 +1,14 @@
 import { Logger, Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { Password, User, Vault, VaultMember } from '../../../database/models';
 import {
+  OrganizationMember,
+  Password,
+  User,
+  Vault,
+  VaultMember,
+} from '../../../database/models';
+import {
+  OrganizationMemberRepository,
   PasswordRepository,
   UsersRepository,
   VaultMemberRepository,
@@ -10,10 +17,17 @@ import {
 import { VaultsController } from './vaults.controller';
 import { VaultsService } from './vaults.service';
 import { LoggerModule } from 'src/common/logger/logger.module';
+import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([User, Vault, VaultMember, Password]),
+    SequelizeModule.forFeature([
+      User,
+      Vault,
+      VaultMember,
+      Password,
+      OrganizationMember,
+    ]),
     LoggerModule,
   ],
   controllers: [VaultsController],
@@ -23,6 +37,8 @@ import { LoggerModule } from 'src/common/logger/logger.module';
     VaultRepository,
     VaultMemberRepository,
     PasswordRepository,
+    OrganizationMemberRepository,
+    TenantAccessGuard,
   ],
   exports: [VaultsService],
 })

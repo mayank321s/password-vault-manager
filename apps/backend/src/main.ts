@@ -98,6 +98,7 @@ async function bootstrap() {
             'Authorization',
             'X-Requested-With',
             'Accept',
+            'X-Organization-Id',
           ],
           exposedHeaders: ['X-Total-Count', 'X-Page-Count'],
           maxAge: 3600, // 1 hour
