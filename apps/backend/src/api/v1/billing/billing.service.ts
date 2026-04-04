@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import { CurrentUserData } from 'src/common/decorators';
 import { CreateCheckoutSessionRequestDto } from './dto';
 import {
+  OrganizationMemberRepository,
   OrganizationSubscriptionRepository,
   StripeWebhookEventRepository,
 } from 'src/database/repositories';
@@ -33,6 +34,7 @@ export class BillingService {
     private readonly configService: ConfigService,
     private readonly stripeWebhookEventRepository: StripeWebhookEventRepository,
     private readonly organizationSubscriptionRepository: OrganizationSubscriptionRepository,
+    private readonly organizationMemberRepository: OrganizationMemberRepository,
     private readonly sequelize: Sequelize,
   ) {
     const billing = this.configService.get<BillingConfig>('billing');
@@ -129,6 +131,44 @@ export class BillingService {
         ? subscription.currentPeriodEndAt.toISOString()
         : null,
       lastStripeEventId: subscription.lastStripeEventId,
+    };
+  }
+
+  async getEntitlements(user: CurrentUserData) {
+    if (!user.organizationId) {
+      throw new BadRequestException('Organization context is required');
+    }
+
+    const subscription =
+      await this.organizationSubscriptionRepository.findOneBy({
+        organizationId: user.organizationId,
+      });
+    if (!subscription) {
+      throw new BadRequestException('No subscription found for organization');
+    }
+
+    const seatsUsed = await this.organizationMemberRepository.countActiveMembers(
+      user.organizationId,
+    );
+    const maxSeats = subscription.planType === SubscriptionPlanType.FAMILY ? 6 : 100;
+    const availableSeats = Math.max(maxSeats - seatsUsed, 0);
+
+    const isPlanUsable =
+      subscription.lifecycleStatus !== SubscriptionLifecycleStatus.FAILURE &&
+      subscription.lifecycleStatus !== SubscriptionLifecycleStatus.CANCELED;
+
+    return {
+      planType: subscription.planType,
+      lifecycleStatus: subscription.lifecycleStatus,
+      seats: {
+        used: seatsUsed,
+        max: maxSeats,
+        available: availableSeats,
+      },
+      features: {
+        externalShares:
+          isPlanUsable && subscription.planType === SubscriptionPlanType.BUSINESS,
+      },
     };
   }
 

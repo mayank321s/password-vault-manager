@@ -28,5 +28,14 @@ export class OrganizationMemberRepository extends BaseRepository<OrganizationMem
       ],
     });
   }
+
+  async countActiveMembers(organizationId: string): Promise<number> {
+    return this.model.count({
+      where: {
+        organizationId,
+        status: OrganizationMemberStatus.ACTIVE,
+      },
+    });
+  }
 }
 
