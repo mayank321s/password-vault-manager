@@ -16,6 +16,7 @@ import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import {
+  OrganizationRepository,
   OrganizationMemberRepository,
   SessionRepository,
   UsersRepository,
@@ -60,6 +61,7 @@ import { TotpService } from 'src/common/services/totp.service';
     JwtConfig,
     VaultMemberRepository,
     OrganizationMemberRepository,
+    OrganizationRepository,
     SessionRepository,
     TotpConfig,
     TotpService,
