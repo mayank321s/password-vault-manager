@@ -4,6 +4,7 @@ import type { SsoDomainSummary } from '../../services/sso.service';
 import * as styles from './org-settings.css';
 
 interface IdentitySettingsPanelProps {
+  organizationId: string | null;
   organizationType: 'personal' | 'family' | 'business' | null;
 }
 
@@ -12,9 +13,13 @@ function formatDomains(domains: SsoDomainSummary[]) {
 }
 
 export function IdentitySettingsPanel({
+  organizationId,
   organizationType,
 }: IdentitySettingsPanelProps) {
-  const configurationQuery = useSsoConfiguration(organizationType === 'business');
+  const configurationQuery = useSsoConfiguration(
+    organizationId,
+    organizationType === 'business',
+  );
   const upsertMutation = useUpsertSsoConfiguration();
   const verifyMutation = useVerifySsoDomain();
 
@@ -80,12 +85,15 @@ export function IdentitySettingsPanel({
         .filter(Boolean);
 
       await upsertMutation.mutateAsync({
-        tenantId: tenantId.trim(),
-        clientId: clientId.trim(),
-        clientSecretRef: clientSecretRef.trim() || undefined,
-        redirectUri: redirectUri.trim(),
-        domains,
-        primaryDomain: primaryDomain.trim().toLowerCase(),
+        organizationId,
+        payload: {
+          tenantId: tenantId.trim(),
+          clientId: clientId.trim(),
+          clientSecretRef: clientSecretRef.trim() || undefined,
+          redirectUri: redirectUri.trim(),
+          domains,
+          primaryDomain: primaryDomain.trim().toLowerCase(),
+        },
       });
 
       setLocalMessage('SSO configuration saved. Verify each domain to activate login routing.');
@@ -103,6 +111,7 @@ export function IdentitySettingsPanel({
     try {
       await verifyMutation.mutateAsync({
         domainId,
+        organizationId,
         verificationToken: verificationInputs[domainId]?.trim() ?? '',
       });
       setLocalMessage('Domain verification updated. End users can now discover SSO by email domain.');

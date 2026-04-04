@@ -10,9 +10,12 @@ import {
   verifySsoDomain,
 } from '../services/sso.service';
 
-export function useSsoConfiguration(enabled = true) {
+export function useSsoConfiguration(
+  organizationId: string | null,
+  enabled = true,
+) {
   return useQuery({
-    queryKey: ssoKeys.configuration,
+    queryKey: ssoKeys.configuration(organizationId),
     queryFn: async () => {
       try {
         return await getCurrentSsoConfiguration();
@@ -32,10 +35,15 @@ export function useUpsertSsoConfiguration() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: UpsertSsoConfigurationRequest) =>
-      upsertSsoConfiguration(payload),
-    onSuccess: (data) => {
-      queryClient.setQueryData(ssoKeys.configuration, data);
+    mutationFn: (variables: {
+      organizationId: string | null;
+      payload: UpsertSsoConfigurationRequest;
+    }) => upsertSsoConfiguration(variables.payload),
+    onSuccess: (data, variables) => {
+      queryClient.setQueryData(
+        ssoKeys.configuration(variables.organizationId),
+        data,
+      );
     },
   });
 }
@@ -44,15 +52,19 @@ export function useVerifySsoDomain() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      domainId,
-      verificationToken,
-    }: {
+    mutationFn: (variables: {
       domainId: string;
+      organizationId: string | null;
       verificationToken: string;
-    }) => verifySsoDomain(domainId, { verificationToken }),
-    onSuccess: (data) => {
-      queryClient.setQueryData(ssoKeys.configuration, data);
+    }) =>
+      verifySsoDomain(variables.domainId, {
+        verificationToken: variables.verificationToken,
+      }),
+    onSuccess: (data, variables) => {
+      queryClient.setQueryData(
+        ssoKeys.configuration(variables.organizationId),
+        data,
+      );
     },
   });
 }

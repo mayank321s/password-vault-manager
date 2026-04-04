@@ -38,7 +38,8 @@ export const emergencyAccessKeys = {
 
 export const ssoKeys = {
   all: ['sso'] as const,
-  configuration: ['sso', 'configuration'] as const,
+  configuration: (organizationId: string | null) =>
+    ['sso', 'configuration', organizationId ?? 'none'] as const,
   lookup: (email: string) => ['sso', 'lookup', email.toLowerCase().trim()] as const,
   callback: (code: string, state: string) => ['sso', 'callback', code, state] as const,
 };

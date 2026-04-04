@@ -43,7 +43,7 @@ function isSectionKey(value: string | undefined): value is SectionKey {
 
 export default function OrgSettingsPage() {
   const { section } = useParams<{ section?: string }>();
-  const { activeOrganizationType } = useOrganizationContext();
+  const { activeOrganizationId, activeOrganizationType } = useOrganizationContext();
 
   if (!section) {
     return <Navigate to="/settings/organization/policy" replace />;
@@ -106,7 +106,10 @@ export default function OrgSettingsPage() {
           )}
           {section === 'identity' && (
             <div className={styles.embeddedSection}>
-              <IdentitySettingsPanel organizationType={activeOrganizationType} />
+              <IdentitySettingsPanel
+                organizationId={activeOrganizationId}
+                organizationType={activeOrganizationType}
+              />
             </div>
           )}
         </section>
