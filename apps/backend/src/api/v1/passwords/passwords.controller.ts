@@ -13,9 +13,13 @@ import {
 import {
   CurrentUser,
   Public,
+  RequireOrgPolicy,
+  RequireOrgRoles,
   type CurrentUserData,
 } from '../../../common/decorators';
 import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
+import { OrganizationPolicyGuard } from 'src/common/guards/organization-policy.guard';
+import { OrganizationRoleGuard } from 'src/common/guards/organization-role.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
   AccessOneTimeShareResponseDto,
@@ -31,6 +35,7 @@ import {
 } from './dto';
 import { PasswordsService } from './passwords.service';
 import { ZodResponse } from 'nestjs-zod';
+import { OrganizationMemberRole } from 'src/database/models';
 
 /**
  * Passwords Controller
@@ -40,7 +45,12 @@ import { ZodResponse } from 'nestjs-zod';
  * Authorization is enforced at service layer (vault membership verification)
  */
 @Controller()
-@UseGuards(JwtAuthGuard, TenantAccessGuard)
+@UseGuards(
+  JwtAuthGuard,
+  TenantAccessGuard,
+  OrganizationRoleGuard,
+  OrganizationPolicyGuard,
+)
 export class PasswordsController {
   constructor(private readonly passwordsService: PasswordsService) {}
 
@@ -171,6 +181,11 @@ export class PasswordsController {
    */
   @Post(':passwordId/permissions')
   @HttpCode(HttpStatus.CREATED)
+  @RequireOrgRoles(
+    OrganizationMemberRole.OWNER,
+    OrganizationMemberRole.ADMIN,
+    OrganizationMemberRole.MANAGER,
+  )
   @ZodResponse({
     status: HttpStatus.CREATED,
     type: PasswordPermissionResponseDto,
@@ -244,6 +259,11 @@ export class PasswordsController {
    */
   @Delete(':passwordId/permissions/:userId')
   @HttpCode(HttpStatus.OK)
+  @RequireOrgRoles(
+    OrganizationMemberRole.OWNER,
+    OrganizationMemberRole.ADMIN,
+    OrganizationMemberRole.MANAGER,
+  )
   async revokePasswordPermission(
     @CurrentUser() user: CurrentUserData,
     @Param('passwordId') passwordId: string,
@@ -270,6 +290,12 @@ export class PasswordsController {
    */
   @Post(':passwordId/share')
   @HttpCode(HttpStatus.CREATED)
+  @RequireOrgRoles(
+    OrganizationMemberRole.OWNER,
+    OrganizationMemberRole.ADMIN,
+    OrganizationMemberRole.MANAGER,
+  )
+  @RequireOrgPolicy({ allowExternalSharing: false })
   @ZodResponse({ status: HttpStatus.CREATED, type: OneTimeShareResponseDto })
   async createOneTimeShare(
     @CurrentUser() user: CurrentUserData,

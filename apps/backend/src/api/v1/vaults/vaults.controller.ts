@@ -11,8 +11,13 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { CurrentUser, type CurrentUserData } from '../../../common/decorators';
+import {
+  CurrentUser,
+  RequireOrgRoles,
+  type CurrentUserData,
+} from '../../../common/decorators';
 import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
+import { OrganizationRoleGuard } from 'src/common/guards/organization-role.guard';
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
@@ -28,9 +33,10 @@ import {
   VaultResponseDto,
 } from './dto';
 import { VaultsService } from './vaults.service';
+import { OrganizationMemberRole } from 'src/database/models';
 
 @Controller()
-@UseGuards(JwtAuthGuard, TenantAccessGuard)
+@UseGuards(JwtAuthGuard, TenantAccessGuard, OrganizationRoleGuard)
 export class VaultsController {
   constructor(private readonly vaultsService: VaultsService) {}
 
@@ -174,6 +180,11 @@ export class VaultsController {
    */
   @Post(':vaultId/members')
   @HttpCode(HttpStatus.CREATED)
+  @RequireOrgRoles(
+    OrganizationMemberRole.OWNER,
+    OrganizationMemberRole.ADMIN,
+    OrganizationMemberRole.MANAGER,
+  )
   async addVaultMember(
     @CurrentUser() user: CurrentUserData,
     @Param('vaultId') vaultId: string,
@@ -196,6 +207,7 @@ export class VaultsController {
    */
   @Patch(':vaultId/members/:memberId')
   @HttpCode(HttpStatus.OK)
+  @RequireOrgRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADMIN)
   async updateVaultMemberRole(
     @CurrentUser() user: CurrentUserData,
     @Param('vaultId') vaultId: string,
@@ -230,6 +242,11 @@ export class VaultsController {
    */
   @Delete(':vaultId/members/:memberId')
   @HttpCode(HttpStatus.OK)
+  @RequireOrgRoles(
+    OrganizationMemberRole.OWNER,
+    OrganizationMemberRole.ADMIN,
+    OrganizationMemberRole.MANAGER,
+  )
   async removeVaultMember(
     @CurrentUser() user: CurrentUserData,
     @Param('vaultId') vaultId: string,
@@ -264,6 +281,7 @@ export class VaultsController {
    */
   @Post(':vaultId/rotate-keys')
   @HttpCode(HttpStatus.OK)
+  @RequireOrgRoles(OrganizationMemberRole.OWNER, OrganizationMemberRole.ADMIN)
   async rotateVaultKeys(
     @CurrentUser() user: CurrentUserData,
     @Param('vaultId') vaultId: string,

@@ -18,6 +18,7 @@ import { VaultsController } from './vaults.controller';
 import { VaultsService } from './vaults.service';
 import { LoggerModule } from 'src/common/logger/logger.module';
 import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
+import { OrganizationRoleGuard } from 'src/common/guards/organization-role.guard';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
     PasswordRepository,
     OrganizationMemberRepository,
     TenantAccessGuard,
+    OrganizationRoleGuard,
   ],
   exports: [VaultsService],
 })

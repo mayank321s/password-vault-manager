@@ -8,9 +8,11 @@ import {
   User,
   OneTimeShare,
   Vault,
+  OrganizationPolicy,
 } from 'src/database/models';
 import {
   OrganizationMemberRepository,
+  OrganizationPolicyRepository,
   PasswordRepository,
   VaultMemberRepository,
   PasswordPermissionRepository,
@@ -22,6 +24,8 @@ import { PasswordsController } from './passwords.controller';
 import { PasswordsService } from './passwords.service';
 import { LoggerModule } from 'src/common/logger/logger.module';
 import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
+import { OrganizationRoleGuard } from 'src/common/guards/organization-role.guard';
+import { OrganizationPolicyGuard } from 'src/common/guards/organization-policy.guard';
 
 /**
  * Passwords Module
@@ -47,6 +51,7 @@ import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
       OneTimeShare,
       Vault,
       OrganizationMember,
+      OrganizationPolicy,
     ]),
     LoggerModule,
   ],
@@ -60,7 +65,10 @@ import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
     OneTimeShareRepository,
     VaultRepository,
     OrganizationMemberRepository,
+    OrganizationPolicyRepository,
     TenantAccessGuard,
+    OrganizationRoleGuard,
+    OrganizationPolicyGuard,
   ],
   exports: [PasswordsService],
 })
