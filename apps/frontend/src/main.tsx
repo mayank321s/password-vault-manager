@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SessionProvider } from './contexts/SessionContext';
+import { OrganizationProvider } from './contexts/OrganizationContext';
 import { apiClient } from './lib/api-client';
 import App from './App.tsx';
 import './index.css';
@@ -26,7 +27,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <ReactQueryDevtools initialIsOpen={false} />
       <SessionProvider>
-        <App />
+        <OrganizationProvider>
+          <App />
+        </OrganizationProvider>
       </SessionProvider>
     </QueryClientProvider>
   </React.StrictMode>,

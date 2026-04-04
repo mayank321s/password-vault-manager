@@ -69,9 +69,42 @@ interface RecoveryStepOneCache {
   newSalt: string;
 }
 
+interface JwtOrganizationClaims {
+  organizationId?: string | null;
+  organizationType?: string | null;
+}
+
 let _registrationCache: RegistrationStepOneCache | null = null;
 let _loginCache: LoginStepOneCache | null = null;
 let _recoveryCache: RecoveryStepOneCache | null = null;
+
+async function persistOrganizationClaims(accessToken: string): Promise<void> {
+  try {
+    const [, payload] = accessToken.split('.');
+    if (!payload) {
+      return;
+    }
+
+    const normalizedPayload = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const paddedPayload =
+      normalizedPayload + '='.repeat((4 - (normalizedPayload.length % 4)) % 4);
+    const claims = JSON.parse(atob(paddedPayload)) as JwtOrganizationClaims;
+
+    if (claims.organizationId) {
+      await saveSessionData('active_organization_id', claims.organizationId);
+      await saveSessionData('organization_ids', claims.organizationId);
+    }
+
+    if (claims.organizationType) {
+      await saveSessionData(
+        'active_organization_type',
+        claims.organizationType,
+      );
+    }
+  } catch {
+    // Ignore malformed tokens here; auth still proceeds.
+  }
+}
 
 // ============================================
 // Registration Flow
@@ -236,6 +269,7 @@ export async function completeRegistration(
 
     onProgress?.('Saving authentication data...', 60);
     await apiClient.setAuthToken(accessToken);
+    await persistOrganizationClaims(accessToken);
 
     await saveUserKeys(
       user.id,
@@ -414,6 +448,7 @@ export async function loginUser(
 
     onProgress?.('Saving session data...', 85);
     await apiClient.setAuthToken(accessToken);
+    await persistOrganizationClaims(accessToken);
 
     await saveUserKeys(
       user.id,
@@ -506,6 +541,7 @@ export async function loginWithTotp(
 
     onProgress?.('Saving session data...', 82);
     await apiClient.setAuthToken(accessToken);
+    await persistOrganizationClaims(accessToken);
 
     await saveUserKeys(
       user.id,
@@ -762,6 +798,7 @@ export async function enrollTotpAfterRecovery(
 
     onProgress?.('Saving authentication data...', 55);
     await apiClient.setAuthToken(accessToken);
+    await persistOrganizationClaims(accessToken);
 
     await saveUserKeys(
       user.id,
