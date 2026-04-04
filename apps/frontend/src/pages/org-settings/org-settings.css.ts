@@ -298,3 +298,46 @@ export const errorText = style({
   fontSize: '0.9rem',
   lineHeight: 1.5,
 });
+
+export const warningText = style({
+  margin: 0,
+  color: '#fde68a',
+  fontSize: '0.9rem',
+  lineHeight: 1.5,
+});
+
+export const endpointCard = style({
+  borderRadius: '14px',
+  border: '1px solid #1e293b',
+  backgroundColor: '#111827',
+  padding: '0.9rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.45rem',
+});
+
+export const secretCard = style({
+  borderRadius: '14px',
+  border: '1px solid rgba(125, 211, 252, 0.26)',
+  backgroundColor: 'rgba(8, 47, 73, 0.35)',
+  padding: '0.9rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.45rem',
+});
+
+export const logList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.75rem',
+});
+
+export const logCard = style({
+  borderRadius: '14px',
+  border: '1px solid #1e293b',
+  backgroundColor: '#111827',
+  padding: '0.9rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.45rem',
+});

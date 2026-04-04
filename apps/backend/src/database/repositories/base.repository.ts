@@ -28,7 +28,7 @@ export class BaseRepository<T extends Model> {
 
   async create(
     data: MakeNullishOptional<T['_creationAttributes']>,
-    transaction: Transaction,
+    transaction?: Transaction,
   ) {
     return this.model.create(data, { transaction });
   }

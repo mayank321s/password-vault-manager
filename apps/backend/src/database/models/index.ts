@@ -21,6 +21,11 @@ import { Session } from './session.model';
 import { StripeWebhookEvent } from './stripe-webhook-event.model';
 import { SsoConfiguration, SsoProvider } from './sso-configuration.model';
 import { SsoVerifiedDomain } from './sso-verified-domain.model';
+import {
+  ScimProvisioningEvent,
+  ScimProvisioningEventStatus,
+} from './scim-provisioning-event.model';
+import { ScimToken } from './scim-token.model';
 
 export { User } from './user.model';
 export { Organization, OrganizationType } from './organization.model';
@@ -47,6 +52,11 @@ export {
 } from './emergency-access-grant.model';
 export { SsoConfiguration, SsoProvider } from './sso-configuration.model';
 export { SsoVerifiedDomain } from './sso-verified-domain.model';
+export {
+  ScimProvisioningEvent,
+  ScimProvisioningEventStatus,
+} from './scim-provisioning-event.model';
+export { ScimToken } from './scim-token.model';
 export { OneTimeShare } from './one-time-share.model';
 export { Session } from './session.model';
 export { StripeWebhookEvent } from './stripe-webhook-event.model';
@@ -65,6 +75,8 @@ export const models = [
   EmergencyAccessGrant,
   SsoConfiguration,
   SsoVerifiedDomain,
+  ScimToken,
+  ScimProvisioningEvent,
   OneTimeShare,
   Session,
   StripeWebhookEvent,

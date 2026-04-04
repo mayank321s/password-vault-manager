@@ -6,18 +6,20 @@ import {
 } from '@nestjs/common';
 import { randomBytes } from 'crypto';
 import { Sequelize } from 'sequelize-typescript';
-import { CurrentUserData } from 'src/common/decorators';
+import { CurrentScimContextData, CurrentUserData } from 'src/common/decorators';
 import {
   OrganizationMember,
   OrganizationMemberProvisionSource,
   OrganizationMemberRole,
   OrganizationMemberStatus,
   OrganizationType,
+  ScimProvisioningEventStatus,
   User,
 } from 'src/database/models';
 import {
   OrganizationMemberRepository,
   OrganizationRepository,
+  ScimProvisioningEventRepository,
   UsersRepository,
 } from 'src/database/repositories';
 import {
@@ -41,21 +43,9 @@ type ScimRoleGroup = {
 };
 
 const SCIM_ROLE_GROUPS: ScimRoleGroup[] = [
-  {
-    id: 'admins',
-    displayName: 'Admins',
-    role: OrganizationMemberRole.ADMIN,
-  },
-  {
-    id: 'managers',
-    displayName: 'Managers',
-    role: OrganizationMemberRole.MANAGER,
-  },
-  {
-    id: 'members',
-    displayName: 'Members',
-    role: OrganizationMemberRole.MEMBER,
-  },
+  { id: 'admins', displayName: 'Admins', role: OrganizationMemberRole.ADMIN },
+  { id: 'managers', displayName: 'Managers', role: OrganizationMemberRole.MANAGER },
+  { id: 'members', displayName: 'Members', role: OrganizationMemberRole.MEMBER },
 ];
 
 @Injectable()
@@ -64,14 +54,22 @@ export class ScimService {
     private readonly sequelize: Sequelize,
     private readonly organizationRepository: OrganizationRepository,
     private readonly organizationMemberRepository: OrganizationMemberRepository,
+    private readonly scimProvisioningEventRepository: ScimProvisioningEventRepository,
     private readonly usersRepository: UsersRepository,
   ) {}
 
-  async listUsers(currentUser: CurrentUserData) {
-    const organizationId = await this.requireBusinessOrganizationAdmin(currentUser);
+  async listUsers(scimContext: CurrentScimContextData) {
     const memberships = await this.organizationMemberRepository.findByOrganizationIdWithUsers(
-      organizationId,
+      scimContext.organizationId,
     );
+
+    await this.recordEvent(scimContext, {
+      action: 'list_users',
+      resourceType: 'user',
+      resourceId: null,
+      status: ScimProvisioningEventStatus.SUCCESS,
+      detail: `Returned ${memberships.length} SCIM users`,
+    });
 
     return {
       schemas: [SCIM_LIST_SCHEMA],
@@ -82,40 +80,63 @@ export class ScimService {
     };
   }
 
-  async getUser(currentUser: CurrentUserData, resourceId: string) {
-    const organizationId = await this.requireBusinessOrganizationAdmin(currentUser);
-    const membership = await this.requireMembershipResource(organizationId, resourceId);
+  async getUser(scimContext: CurrentScimContextData, resourceId: string) {
+    const membership = await this.requireMembershipResource(
+      scimContext.organizationId,
+      resourceId,
+    );
+
+    await this.recordEvent(scimContext, {
+      action: 'get_user',
+      resourceType: 'user',
+      resourceId,
+      status: ScimProvisioningEventStatus.SUCCESS,
+      detail: `Fetched SCIM user ${resourceId}`,
+    });
+
     return this.toScimUser(membership);
   }
 
-  async createUser(currentUser: CurrentUserData, payload: ScimCreateUserRequest) {
-    const organizationId = await this.requireBusinessOrganizationAdmin(currentUser);
+  async createUser(
+    scimContext: CurrentScimContextData,
+    payload: ScimCreateUserRequest,
+  ) {
     const normalizedEmail = payload.userName.toLowerCase().trim();
     const existingByExternalId = payload.externalId
       ? await this.organizationMemberRepository.findByScimExternalId(
-          organizationId,
+          scimContext.organizationId,
           payload.externalId.trim(),
         )
       : null;
 
     if (existingByExternalId) {
-      return this.updateMembershipFromPayload(existingByExternalId, payload);
+      return this.updateMembershipFromPayload(
+        scimContext,
+        existingByExternalId,
+        payload,
+        'create_user',
+      );
     }
 
     const existingUser = await this.usersRepository.findByEmail(normalizedEmail);
     const existingMembership = existingUser
       ? await this.organizationMemberRepository.findOneBy({
-          organizationId,
+          organizationId: scimContext.organizationId,
           userId: existingUser.id,
         })
       : null;
 
     if (existingMembership) {
       const existingMembershipResource = await this.requireMembershipResource(
-        organizationId,
+        scimContext.organizationId,
         existingMembership.id,
       );
-      return this.updateMembershipFromPayload(existingMembershipResource, payload);
+      return this.updateMembershipFromPayload(
+        scimContext,
+        existingMembershipResource,
+        payload,
+        'create_user',
+      );
     }
 
     const membershipId = await this.sequelize.transaction(async (transaction) => {
@@ -128,7 +149,7 @@ export class ScimService {
 
       const membership = await this.organizationMemberRepository.create(
         {
-          organizationId,
+          organizationId: scimContext.organizationId,
           userId: user.id,
           role: OrganizationMemberRole.MEMBER,
           ...this.buildMembershipUpdate(payload),
@@ -139,27 +160,48 @@ export class ScimService {
       return membership.id;
     });
 
-    const persisted = await this.requireMembershipResource(organizationId, membershipId);
+    const persisted = await this.requireMembershipResource(
+      scimContext.organizationId,
+      membershipId,
+    );
+
+    await this.recordEvent(scimContext, {
+      action: 'create_user',
+      resourceType: 'user',
+      resourceId: persisted.id,
+      status: ScimProvisioningEventStatus.SUCCESS,
+      detail: `Provisioned ${persisted.user.email}`,
+    });
+
     return this.toScimUser(persisted);
   }
 
   async updateUser(
-    currentUser: CurrentUserData,
+    scimContext: CurrentScimContextData,
     resourceId: string,
     payload: ScimUpdateUserRequest,
   ) {
-    const organizationId = await this.requireBusinessOrganizationAdmin(currentUser);
-    const membership = await this.requireMembershipResource(organizationId, resourceId);
-    return this.updateMembershipFromPayload(membership, payload);
+    const membership = await this.requireMembershipResource(
+      scimContext.organizationId,
+      resourceId,
+    );
+    return this.updateMembershipFromPayload(
+      scimContext,
+      membership,
+      payload,
+      'update_user',
+    );
   }
 
   async patchUser(
-    currentUser: CurrentUserData,
+    scimContext: CurrentScimContextData,
     resourceId: string,
     payload: ScimPatchUserRequest,
   ) {
-    const organizationId = await this.requireBusinessOrganizationAdmin(currentUser);
-    const membership = await this.requireMembershipResource(organizationId, resourceId);
+    const membership = await this.requireMembershipResource(
+      scimContext.organizationId,
+      resourceId,
+    );
 
     const nextState: ScimUpdateUserRequest = {
       userName: membership.user.email,
@@ -178,19 +220,13 @@ export class ScimService {
         if (typeof mappedValue.userName === 'string' && mappedValue.userName.trim()) {
           nextState.userName = mappedValue.userName.trim();
         }
-        if (
-          typeof mappedValue.displayName === 'string' &&
-          mappedValue.displayName.trim()
-        ) {
+        if (typeof mappedValue.displayName === 'string' && mappedValue.displayName.trim()) {
           nextState.displayName = mappedValue.displayName.trim();
         }
         if (typeof mappedValue.active === 'boolean') {
           nextState.active = mappedValue.active;
         }
-        if (
-          typeof mappedValue.externalId === 'string' &&
-          mappedValue.externalId.trim()
-        ) {
+        if (typeof mappedValue.externalId === 'string' && mappedValue.externalId.trim()) {
           nextState.externalId = mappedValue.externalId.trim();
         }
         continue;
@@ -218,17 +254,20 @@ export class ScimService {
 
       if ((op === 'replace' || op === 'add') && path === 'externalid') {
         nextState.externalId = String(value ?? '').trim() || undefined;
-        continue;
       }
     }
 
-    return this.updateMembershipFromPayload(membership, nextState);
+    return this.updateMembershipFromPayload(
+      scimContext,
+      membership,
+      nextState,
+      'patch_user',
+    );
   }
 
-  async listGroups(currentUser: CurrentUserData) {
-    const organizationId = await this.requireBusinessOrganizationAdmin(currentUser);
+  async listGroups(scimContext: CurrentScimContextData) {
     const memberships = await this.organizationMemberRepository.findByOrganizationIdWithUsers(
-      organizationId,
+      scimContext.organizationId,
     );
 
     const groups = SCIM_ROLE_GROUPS.map((group) =>
@@ -242,6 +281,14 @@ export class ScimService {
       ),
     );
 
+    await this.recordEvent(scimContext, {
+      action: 'list_groups',
+      resourceType: 'group',
+      resourceId: null,
+      status: ScimProvisioningEventStatus.SUCCESS,
+      detail: `Returned ${groups.length} SCIM groups`,
+    });
+
     return {
       schemas: [SCIM_LIST_SCHEMA],
       totalResults: groups.length,
@@ -251,14 +298,13 @@ export class ScimService {
     };
   }
 
-  async getGroup(currentUser: CurrentUserData, groupId: string) {
-    const organizationId = await this.requireBusinessOrganizationAdmin(currentUser);
+  async getGroup(scimContext: CurrentScimContextData, groupId: string) {
     const group = this.requireRoleGroup(groupId);
     const memberships = await this.organizationMemberRepository.findByOrganizationIdWithUsers(
-      organizationId,
+      scimContext.organizationId,
     );
 
-    return this.toScimGroup(
+    const response = this.toScimGroup(
       group,
       memberships.filter(
         (membership) =>
@@ -266,17 +312,26 @@ export class ScimService {
           membership.status === OrganizationMemberStatus.ACTIVE,
       ),
     );
+
+    await this.recordEvent(scimContext, {
+      action: 'get_group',
+      resourceType: 'group',
+      resourceId: groupId,
+      status: ScimProvisioningEventStatus.SUCCESS,
+      detail: `Fetched SCIM group ${groupId}`,
+    });
+
+    return response;
   }
 
   async patchGroup(
-    currentUser: CurrentUserData,
+    scimContext: CurrentScimContextData,
     groupId: string,
     payload: ScimPatchGroupRequest,
   ) {
-    const organizationId = await this.requireBusinessOrganizationAdmin(currentUser);
     const group = this.requireRoleGroup(groupId);
     const memberships = await this.organizationMemberRepository.findByOrganizationIdWithUsers(
-      organizationId,
+      scimContext.organizationId,
     );
     const membershipMap = new Map(memberships.map((membership) => [membership.id, membership]));
 
@@ -346,93 +401,15 @@ export class ScimService {
       }
     });
 
-    return this.getGroup(currentUser, groupId);
-  }
-
-  private async updateMembershipFromPayload(
-    membership: OrganizationMember & { user: User },
-    payload: ScimUpdateUserRequest | ScimCreateUserRequest,
-  ) {
-    const normalizedEmail = payload.userName.toLowerCase().trim();
-    const trimmedExternalId = payload.externalId?.trim() || null;
-    const normalizedDisplayName =
-      payload.displayName?.trim() || normalizedEmail.split('@')[0];
-    const nextStatus = payload.active === false
-      ? OrganizationMemberStatus.SUSPENDED
-      : OrganizationMemberStatus.ACTIVE;
-
-    const conflictingUser = await this.usersRepository.findByEmail(normalizedEmail);
-    if (conflictingUser && conflictingUser.id !== membership.userId) {
-      throw new BadRequestException('Email is already assigned to another user');
-    }
-
-    await this.sequelize.transaction(async (transaction) => {
-      await membership.user.update(
-        {
-          email: normalizedEmail,
-          username: normalizedDisplayName,
-        },
-        { transaction },
-      );
-
-      await membership.update(
-        {
-          status: nextStatus,
-          joinedAt:
-            nextStatus === OrganizationMemberStatus.ACTIVE
-              ? membership.joinedAt ?? new Date()
-              : membership.joinedAt,
-          removedAt:
-            nextStatus === OrganizationMemberStatus.SUSPENDED ? new Date() : null,
-          scimExternalId: trimmedExternalId,
-          provisionSource: OrganizationMemberProvisionSource.SCIM,
-        },
-        { transaction },
-      );
+    await this.recordEvent(scimContext, {
+      action: 'patch_group',
+      resourceType: 'group',
+      resourceId: groupId,
+      status: ScimProvisioningEventStatus.SUCCESS,
+      detail: `Applied ${payload.Operations.length} group operations`,
     });
 
-    const updated = await this.requireMembershipResource(
-      membership.organizationId,
-      membership.id,
-    );
-    return this.toScimUser(updated);
-  }
-
-  private buildPlaceholderUser(email: string, displayName?: string) {
-    const placeholder = randomBytes(24).toString('hex');
-    const normalizedDisplayName = displayName?.trim() || email.split('@')[0];
-
-    return {
-      email,
-      username: normalizedDisplayName,
-      passwordHash: `scim-${placeholder}`,
-      publicKey: `SCIM_PUBLIC_KEY_${placeholder}`,
-      signingPublicKey: `SCIM_SIGNING_PUBLIC_KEY_${placeholder}`,
-      encryptedPrivateKey: `SCIM_ENCRYPTED_PRIVATE_KEY_${placeholder}`,
-      encryptedSigningPrivateKey: `SCIM_ENCRYPTED_SIGNING_PRIVATE_KEY_${placeholder}`,
-      encryptedSeedPhrase: `SCIM_ENCRYPTED_SEED_${placeholder}`,
-      encryptionSalt: randomBytes(16).toString('base64'),
-      isActive: true,
-      totpSecret: null,
-      registrationCompletedAt: null,
-      registrationJti: null,
-      totpRegistrationAttempts: 0,
-      totpRegistrationLockedUntil: null,
-    };
-  }
-
-  private buildMembershipUpdate(payload: ScimCreateUserRequest | ScimUpdateUserRequest) {
-    const isActive = payload.active !== false;
-    return {
-      status: isActive
-        ? OrganizationMemberStatus.ACTIVE
-        : OrganizationMemberStatus.SUSPENDED,
-      invitedAt: new Date(),
-      joinedAt: isActive ? new Date() : null,
-      removedAt: isActive ? null : new Date(),
-      scimExternalId: payload.externalId?.trim() || null,
-      provisionSource: OrganizationMemberProvisionSource.SCIM,
-    };
+    return this.getGroup(scimContext, groupId);
   }
 
   private async requireBusinessOrganizationAdmin(user: CurrentUserData) {
@@ -464,12 +441,122 @@ export class ScimService {
     return organization.id;
   }
 
+  private async updateMembershipFromPayload(
+    scimContext: CurrentScimContextData,
+    membership: OrganizationMember & { user: User },
+    payload: ScimUpdateUserRequest | ScimCreateUserRequest,
+    action: string,
+  ) {
+    const normalizedEmail = payload.userName.toLowerCase().trim();
+    const trimmedExternalId = payload.externalId?.trim() || null;
+    const normalizedDisplayName = payload.displayName?.trim() || normalizedEmail.split('@')[0];
+    const nextStatus =
+      payload.active === false
+        ? OrganizationMemberStatus.SUSPENDED
+        : OrganizationMemberStatus.ACTIVE;
+
+    const conflictingUser = await this.usersRepository.findByEmail(normalizedEmail);
+    if (conflictingUser && conflictingUser.id !== membership.userId) {
+      throw new BadRequestException('Email is already assigned to another user');
+    }
+
+    await this.sequelize.transaction(async (transaction) => {
+      await membership.user.update(
+        {
+          email: normalizedEmail,
+          username: normalizedDisplayName,
+        },
+        { transaction },
+      );
+
+      await membership.update(
+        {
+          status: nextStatus,
+          joinedAt:
+            nextStatus === OrganizationMemberStatus.ACTIVE
+              ? membership.joinedAt ?? new Date()
+              : membership.joinedAt,
+          removedAt: nextStatus === OrganizationMemberStatus.SUSPENDED ? new Date() : null,
+          scimExternalId: trimmedExternalId,
+          provisionSource: OrganizationMemberProvisionSource.SCIM,
+        },
+        { transaction },
+      );
+    });
+
+    const updated = await this.requireMembershipResource(membership.organizationId, membership.id);
+    await this.recordEvent(scimContext, {
+      action,
+      resourceType: 'user',
+      resourceId: updated.id,
+      status: ScimProvisioningEventStatus.SUCCESS,
+      detail: `${updated.user.email} set to ${updated.status}`,
+    });
+    return this.toScimUser(updated);
+  }
+
   private async requireMembershipResource(organizationId: string, resourceId: string) {
     const membership = await this.organizationMemberRepository.findByIdWithUser(resourceId);
     if (!membership || membership.organizationId !== organizationId) {
       throw new NotFoundException('SCIM user resource not found');
     }
     return membership;
+  }
+
+  private async recordEvent(
+    scimContext: CurrentScimContextData,
+    event: {
+      action: string;
+      resourceType: string;
+      resourceId: string | null;
+      status: ScimProvisioningEventStatus;
+      detail: string | null;
+    },
+  ) {
+    await this.scimProvisioningEventRepository.create({
+      organizationId: scimContext.organizationId,
+      scimTokenId: scimContext.scimTokenId,
+      action: event.action,
+      resourceType: event.resourceType,
+      resourceId: event.resourceId,
+      status: event.status,
+      detail: event.detail,
+    });
+  }
+
+  private buildPlaceholderUser(email: string, displayName?: string) {
+    const placeholder = randomBytes(24).toString('hex');
+    const normalizedDisplayName = displayName?.trim() || email.split('@')[0];
+
+    return {
+      email,
+      username: normalizedDisplayName,
+      passwordHash: `scim-${placeholder}`,
+      publicKey: `SCIM_PUBLIC_KEY_${placeholder}`,
+      signingPublicKey: `SCIM_SIGNING_PUBLIC_KEY_${placeholder}`,
+      encryptedPrivateKey: `SCIM_ENCRYPTED_PRIVATE_KEY_${placeholder}`,
+      encryptedSigningPrivateKey: `SCIM_ENCRYPTED_SIGNING_PRIVATE_KEY_${placeholder}`,
+      encryptedSeedPhrase: `SCIM_ENCRYPTED_SEED_${placeholder}`,
+      encryptionSalt: randomBytes(16).toString('base64'),
+      isActive: true,
+      totpSecret: null,
+      registrationCompletedAt: null,
+      registrationJti: null,
+      totpRegistrationAttempts: 0,
+      totpRegistrationLockedUntil: null,
+    };
+  }
+
+  private buildMembershipUpdate(payload: ScimCreateUserRequest | ScimUpdateUserRequest) {
+    const isActive = payload.active !== false;
+    return {
+      status: isActive ? OrganizationMemberStatus.ACTIVE : OrganizationMemberStatus.SUSPENDED,
+      invitedAt: new Date(),
+      joinedAt: isActive ? new Date() : null,
+      removedAt: isActive ? null : new Date(),
+      scimExternalId: payload.externalId?.trim() || null,
+      provisionSource: OrganizationMemberProvisionSource.SCIM,
+    };
   }
 
   private toScimUser(membership: OrganizationMember & { user: User }): ScimUserResource {
@@ -480,12 +567,7 @@ export class ScimService {
       userName: membership.user.email,
       displayName: membership.user.username,
       active: membership.status === OrganizationMemberStatus.ACTIVE,
-      emails: [
-        {
-          value: membership.user.email,
-          primary: true,
-        },
-      ],
+      emails: [{ value: membership.user.email, primary: true }],
       groups: this.toRoleGroups(membership),
     };
   }
@@ -496,12 +578,7 @@ export class ScimService {
       return [];
     }
 
-    return [
-      {
-        value: group.id,
-        display: group.displayName,
-      },
-    ];
+    return [{ value: group.id, display: group.displayName }];
   }
 
   private toScimGroup(
@@ -535,7 +612,11 @@ export class ScimService {
 
     if (Array.isArray(value)) {
       return value
-        .map((entry) => (typeof entry === 'object' && entry ? (entry as { value?: string }).value : undefined))
+        .map((entry) =>
+          typeof entry === 'object' && entry
+            ? (entry as { value?: string }).value
+            : undefined,
+        )
         .filter((entry): entry is string => Boolean(entry));
     }
 

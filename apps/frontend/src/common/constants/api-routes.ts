@@ -94,4 +94,10 @@ export const API_V1_ROUTES = {
     verifyDomain: (domainId: string) =>
       `${API_V1_PREFIX}/sso/config/domains/${domainId}/verify`,
   },
+  scim: {
+    adminTokens: `${API_V1_PREFIX}/scim/admin/tokens`,
+    revokeToken: (tokenId: string) =>
+      `${API_V1_PREFIX}/scim/admin/tokens/${tokenId}/revoke`,
+    adminDiagnostics: `${API_V1_PREFIX}/scim/admin/diagnostics`,
+  },
 };
