@@ -10,20 +10,28 @@ export class VaultRepository extends BaseRepository<Vault> {
     super(model);
   }
 
-  async createPersonalVault(userId: string, transaction: Transaction) {
+  async createPersonalVault(
+    userId: string,
+    transaction: Transaction,
+    organizationId?: string | null,
+  ) {
     return this.create(
       {
         name: 'Personal Vault',
         isPersonalVault: true,
         ownerUserId: userId,
+        organizationId: organizationId ?? null,
       },
       transaction,
     );
   }
 
-  async getVaultMembers(vaultId: string) {
+  async getVaultMembers(vaultId: string, organizationId?: string | null) {
     const vault = await this.model.findOne({
-      where: { id: vaultId },
+      where: {
+        id: vaultId,
+        ...(organizationId ? { organizationId } : {}),
+      },
       include: [
         {
           model: VaultMember,
@@ -32,5 +40,14 @@ export class VaultRepository extends BaseRepository<Vault> {
       ],
     });
     return vault;
+  }
+
+  async findByIdInOrganization(vaultId: string, organizationId?: string | null) {
+    return this.model.findOne({
+      where: {
+        id: vaultId,
+        ...(organizationId ? { organizationId } : {}),
+      },
+    });
   }
 }

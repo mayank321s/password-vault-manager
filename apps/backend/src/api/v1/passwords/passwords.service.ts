@@ -50,14 +50,16 @@ export class PasswordsService {
    */
   async createPassword(
     userId: string,
+    organizationId: string | null,
     request: CreatePasswordDto,
   ): Promise<PasswordResponseDto> {
     try {
       // Verify user is a vault member
-      const membership = await this.vaultMemberRepository.findOneBy({
-        vaultId: request.vaultId,
+      const membership = await this.vaultMemberRepository.findOneByVaultAndUser(
+        request.vaultId,
         userId,
-      });
+        organizationId,
+      );
 
       if (!membership) {
         throw new ForbiddenException('You do not have access to this vault');
@@ -84,7 +86,7 @@ export class PasswordsService {
         isNote: request.isNote,
       });
 
-      return this.buildBasicPasswordResponse(password);
+      return this.buildBasicPasswordResponse(password, organizationId);
     } catch (error) {
       this.logger.error('Failed to create password', {
         userId,
@@ -106,21 +108,26 @@ export class PasswordsService {
    */
   async getPassword(
     userId: string,
+    organizationId: string | null,
     passwordId: string,
   ): Promise<PasswordResponseDto> {
     try {
       const password =
-        await this.passwordRepository.getPasswordDetails(passwordId);
+        await this.passwordRepository.getPasswordDetails(
+          passwordId,
+          organizationId,
+        );
 
       if (!password) {
         throw new NotFoundException('Password not found');
       }
 
       // Check vault membership first
-      const membership = await this.vaultMemberRepository.findOneBy({
-        vaultId: password.vaultId,
+      const membership = await this.vaultMemberRepository.findOneByVaultAndUser(
+        password.vaultId,
         userId,
-      });
+        organizationId,
+      );
 
       let hasAccess = !!membership;
       let isShared = false;
@@ -199,22 +206,27 @@ export class PasswordsService {
    */
   async updatePassword(
     userId: string,
+    organizationId: string | null,
     passwordId: string,
     request: UpdatePasswordDto,
   ): Promise<PasswordResponseDto> {
     try {
       // Get password
-      const password = await this.passwordRepository.findById(passwordId);
+      const password = await this.passwordRepository.findByIdInOrganization(
+        passwordId,
+        organizationId,
+      );
 
       if (!password) {
         throw new NotFoundException('Password not found');
       }
 
       // Check vault membership first
-      const membership = await this.vaultMemberRepository.findOneBy({
-        vaultId: password.vaultId,
+      const membership = await this.vaultMemberRepository.findOneByVaultAndUser(
+        password.vaultId,
         userId,
-      });
+        organizationId,
+      );
 
       // If user is a vault member, they can update (any role)
       let hasAccess = !!membership;
@@ -266,7 +278,7 @@ export class PasswordsService {
         isVaultMember: !!membership,
       });
 
-      return this.buildBasicPasswordResponse(updatedPassword!);
+      return this.buildBasicPasswordResponse(updatedPassword!, organizationId);
     } catch (error) {
       this.logger.error('Failed to update password', {
         userId,
@@ -285,21 +297,26 @@ export class PasswordsService {
    */
   async deletePassword(
     userId: string,
+    organizationId: string | null,
     passwordId: string,
   ): Promise<{ success: boolean }> {
     try {
       // Get password
-      const password = await this.passwordRepository.findById(passwordId);
+      const password = await this.passwordRepository.findByIdInOrganization(
+        passwordId,
+        organizationId,
+      );
 
       if (!password) {
         throw new NotFoundException('Password not found');
       }
 
       // Verify user is a vault member
-      const membership = await this.vaultMemberRepository.findOneBy({
-        vaultId: password.vaultId,
+      const membership = await this.vaultMemberRepository.findOneByVaultAndUser(
+        password.vaultId,
         userId,
-      });
+        organizationId,
+      );
 
       if (!membership) {
         throw new ForbiddenException('You do not have access to this password');
@@ -347,22 +364,27 @@ export class PasswordsService {
    */
   async grantPasswordPermission(
     userId: string,
+    organizationId: string | null,
     passwordId: string,
     request: GrantPasswordPermissionDto,
   ): Promise<PasswordPermissionResponseDto> {
     try {
       // Get password
-      const password = await this.passwordRepository.findById(passwordId);
+      const password = await this.passwordRepository.findByIdInOrganization(
+        passwordId,
+        organizationId,
+      );
 
       if (!password) {
         throw new NotFoundException('Password not found');
       }
 
       // Verify user has permission to share (vault member)
-      const membership = await this.vaultMemberRepository.findOneBy({
-        vaultId: password.vaultId,
+      const membership = await this.vaultMemberRepository.findOneByVaultAndUser(
+        password.vaultId,
         userId,
-      });
+        organizationId,
+      );
 
       if (!membership) {
         throw new ForbiddenException('You do not have access to this password');
@@ -444,21 +466,26 @@ export class PasswordsService {
    */
   async listPasswordPermissions(
     userId: string,
+    organizationId: string | null,
     passwordId: string,
   ): Promise<PasswordPermissionResponseDto[]> {
     try {
       // Get password
-      const password = await this.passwordRepository.findById(passwordId);
+      const password = await this.passwordRepository.findByIdInOrganization(
+        passwordId,
+        organizationId,
+      );
 
       if (!password) {
         throw new NotFoundException('Password not found');
       }
 
       // Verify user has access (vault member)
-      const membership = await this.vaultMemberRepository.findOneBy({
-        vaultId: password.vaultId,
+      const membership = await this.vaultMemberRepository.findOneByVaultAndUser(
+        password.vaultId,
         userId,
-      });
+        organizationId,
+      );
 
       if (!membership) {
         throw new ForbiddenException('You do not have access to this password');
@@ -499,22 +526,27 @@ export class PasswordsService {
    */
   async revokePasswordPermission(
     userId: string,
+    organizationId: string | null,
     passwordId: string,
     targetUserId: string,
   ): Promise<{ success: boolean }> {
     try {
       // Get password
-      const password = await this.passwordRepository.findById(passwordId);
+      const password = await this.passwordRepository.findByIdInOrganization(
+        passwordId,
+        organizationId,
+      );
 
       if (!password) {
         throw new NotFoundException('Password not found');
       }
 
       // Verify user has permission to revoke (vault member)
-      const membership = await this.vaultMemberRepository.findOneBy({
-        vaultId: password.vaultId,
+      const membership = await this.vaultMemberRepository.findOneByVaultAndUser(
+        password.vaultId,
         userId,
-      });
+        organizationId,
+      );
 
       if (!membership) {
         throw new ForbiddenException('You do not have access to this password');
@@ -571,20 +603,25 @@ export class PasswordsService {
    */
   async refreshPasswordShares(
     userId: string,
+    organizationId: string | null,
     passwordId: string,
     request: RefreshPasswordSharesDto,
   ): Promise<{ success: boolean }> {
     try {
-      const password = await this.passwordRepository.findById(passwordId);
+      const password = await this.passwordRepository.findByIdInOrganization(
+        passwordId,
+        organizationId,
+      );
 
       if (!password) {
         throw new NotFoundException('Password not found');
       }
 
-      const membership = await this.vaultMemberRepository.findOneBy({
-        vaultId: password.vaultId,
+      const membership = await this.vaultMemberRepository.findOneByVaultAndUser(
+        password.vaultId,
         userId,
-      });
+        organizationId,
+      );
 
       if (!membership) {
         throw new ForbiddenException('You do not have access to this password');
@@ -629,22 +666,27 @@ export class PasswordsService {
    */
   async createOneTimeShare(
     userId: string,
+    organizationId: string | null,
     passwordId: string,
     request: CreateOneTimeShareDto,
   ): Promise<OneTimeShareResponseDto> {
     try {
       // Get password
-      const password = await this.passwordRepository.findById(passwordId);
+      const password = await this.passwordRepository.findByIdInOrganization(
+        passwordId,
+        organizationId,
+      );
 
       if (!password) {
         throw new NotFoundException('Password not found');
       }
 
       // Check if user has access (vault member or individual permission)
-      const membership = await this.vaultMemberRepository.findOneBy({
-        vaultId: password.vaultId,
+      const membership = await this.vaultMemberRepository.findOneByVaultAndUser(
+        password.vaultId,
         userId,
-      });
+        organizationId,
+      );
 
       let hasAccess = !!membership;
 
@@ -794,10 +836,11 @@ export class PasswordsService {
    */
   private async buildBasicPasswordResponse(
     password: Password,
+    organizationId: string | null,
   ): Promise<PasswordResponseDto> {
     const [creator, vault] = await Promise.all([
       this.usersRepository.findById(password.createdByUserId),
-      this.vaultRepository.findById(password.vaultId),
+      this.vaultRepository.findByIdInOrganization(password.vaultId, organizationId),
     ]);
 
     return {

@@ -14,12 +14,13 @@ import {
   UpdatedAt,
 } from 'sequelize-typescript';
 import { User } from './user.model';
+import { Organization } from './organization.model';
 import { Password } from './password.model';
 import { VaultMember } from './vault-member.model';
 import { InferAttributes } from 'sequelize';
 
 type RequiredColumns = Pick<Vault, 'name' | 'ownerUserId'>;
-type OptionalColumns = Partial<Pick<Vault, 'isPersonalVault'>>;
+type OptionalColumns = Partial<Pick<Vault, 'isPersonalVault' | 'organizationId'>>;
 
 type VaultCreationAttributes = RequiredColumns & OptionalColumns;
 
@@ -56,6 +57,12 @@ export class Vault extends Model<
   @Column(DataType.UUID)
   declare ownerUserId: string;
 
+  @AllowNull(true)
+  @ForeignKey(() => Organization)
+  @Index('vaults_organization_id_idx')
+  @Column(DataType.UUID)
+  declare organizationId: string | null;
+
   @CreatedAt
   @Column({
     type: DataType.DATE,
@@ -73,6 +80,9 @@ export class Vault extends Model<
   // Associations
   @BelongsTo(() => User, 'ownerUserId')
   declare owner: User;
+
+  @BelongsTo(() => Organization, 'organizationId')
+  declare organization: Organization | null;
 
   @HasMany(() => VaultMember, 'vaultId')
   declare members: VaultMember[];

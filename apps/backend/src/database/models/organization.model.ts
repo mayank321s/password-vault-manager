@@ -22,6 +22,7 @@ import {
 import { User } from './user.model';
 import { OrganizationMember } from './organization-member.model';
 import { OrganizationPolicy } from './organization-policy.model';
+import { Vault } from './vault.model';
 
 export const OrganizationType = {
   PERSONAL: 'personal',
@@ -84,5 +85,8 @@ export class Organization extends Model<
 
   @HasOne(() => OrganizationPolicy, 'organizationId')
   declare policy: CreationOptional<OrganizationPolicy>;
+
+  @HasMany(() => Vault, 'organizationId')
+  declare vaults: Vault[];
 }
 
