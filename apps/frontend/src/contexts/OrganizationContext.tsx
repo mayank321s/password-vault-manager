@@ -18,6 +18,10 @@ interface OrganizationContextValue {
   organizationIds: string[];
   isReady: boolean;
   setActiveOrganizationId: (organizationId: string) => Promise<void>;
+  registerOrganization: (
+    organizationId: string,
+    organizationType: Exclude<OrganizationType, null>,
+  ) => Promise<void>;
 }
 
 interface OrganizationProviderProps {
@@ -127,6 +131,29 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
     [organizationIds],
   );
 
+  const registerOrganization = useCallback(
+    async (
+      organizationId: string,
+      organizationType: Exclude<OrganizationType, null>,
+    ) => {
+      const nextOrganizationIds = organizationIds.includes(organizationId)
+        ? organizationIds
+        : [organizationId, ...organizationIds];
+
+      await Promise.all([
+        saveSessionData('organization_ids', nextOrganizationIds.join(',')),
+        saveSessionData('active_organization_id', organizationId),
+        saveSessionData('active_organization_type', organizationType),
+      ]);
+
+      setOrganizationIds(nextOrganizationIds);
+      setActiveOrganizationIdState(organizationId);
+      setActiveOrganizationType(organizationType);
+      apiClient.setOrganizationId(organizationId);
+    },
+    [organizationIds],
+  );
+
   const value = useMemo<OrganizationContextValue>(
     () => ({
       activeOrganizationId,
@@ -134,6 +161,7 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
       organizationIds,
       isReady,
       setActiveOrganizationId,
+      registerOrganization,
     }),
     [
       activeOrganizationId,
@@ -141,6 +169,7 @@ export function OrganizationProvider({ children }: OrganizationProviderProps) {
       organizationIds,
       isReady,
       setActiveOrganizationId,
+      registerOrganization,
     ],
   );
 

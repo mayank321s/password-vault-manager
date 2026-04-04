@@ -24,6 +24,13 @@ const sections = [
     description:
       'Set up identity providers, role defaults, and other organization access controls in a single place.',
   },
+  {
+    key: 'family',
+    label: 'Family',
+    title: 'Family Workspace Setup',
+    description:
+      'Run the guided family onboarding wizard and manage owner/adult/child role assignments.',
+  },
 ] as const;
 
 type SectionKey = (typeof sections)[number]['key'];
@@ -77,6 +84,13 @@ export default function OrgSettingsPage() {
             <p className={styles.sectionDescription} style={{ marginTop: '0.75rem' }}>
               <Link to="/settings/billing" className={styles.billingLink}>
                 Open full billing settings
+              </Link>
+            </p>
+          )}
+          {section === 'family' && (
+            <p className={styles.sectionDescription} style={{ marginTop: '0.75rem' }}>
+              <Link to="/family/onboarding" className={styles.billingLink}>
+                Open family onboarding wizard
               </Link>
             </p>
           )}

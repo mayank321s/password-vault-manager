@@ -24,3 +24,9 @@ export const billingKeys = {
   entitlements: ['billing', 'entitlements'] as const,
   invoices: ['billing', 'invoices'] as const,
 };
+
+export const familyKeys = {
+  all: ['family'] as const,
+  members: (organizationId: string) =>
+    [...familyKeys.all, organizationId, 'members'] as const,
+};
