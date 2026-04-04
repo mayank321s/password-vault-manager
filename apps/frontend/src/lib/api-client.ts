@@ -15,6 +15,7 @@ interface ApiError {
 
 class ApiClient {
   private client: AxiosInstance;
+  private activeOrganizationId: string | null = null;
 
   constructor() {
     this.client = axios.create({
@@ -36,6 +37,9 @@ class ApiClient {
         const token = this.getAuthToken();
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
+        }
+        if (this.activeOrganizationId) {
+          config.headers['X-Organization-Id'] = this.activeOrganizationId;
         }
         return config;
       },
@@ -79,6 +83,7 @@ class ApiClient {
 
     // Clear cached token
     this.cachedToken = null;
+    this.activeOrganizationId = null;
 
     // Redirect to login if not already there
     if (window.location.pathname !== '/login') {
@@ -156,6 +161,7 @@ class ApiClient {
   async clearAuthToken() {
     await clearAllData();
     this.cachedToken = null;
+    this.activeOrganizationId = null;
   }
 
   // Helper method to initialize token from storage on app load
@@ -164,6 +170,10 @@ class ApiClient {
     if (typeof token === 'string') {
       this.cachedToken = token;
     }
+  }
+
+  setOrganizationId(organizationId: string | null) {
+    this.activeOrganizationId = organizationId;
   }
 }
 

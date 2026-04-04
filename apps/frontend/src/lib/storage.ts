@@ -26,6 +26,9 @@ interface SessionDataMap {
   user_email: string;
   user_username: string;
   jwt_token: string;
+  active_organization_id: string;
+  active_organization_type: string;
+  organization_ids: string;
 }
 
 // ============================================
@@ -133,6 +136,9 @@ export async function clearAllExceptEmail(): Promise<void> {
     indexedDBService.deleteSessionData('user_id'),
     indexedDBService.deleteSessionData('user_username'),
     indexedDBService.deleteSessionData('jwt_token'),
+    indexedDBService.deleteSessionData('active_organization_id'),
+    indexedDBService.deleteSessionData('active_organization_type'),
+    indexedDBService.deleteSessionData('organization_ids'),
   ]);
   sessionStorage.clear();
 }
