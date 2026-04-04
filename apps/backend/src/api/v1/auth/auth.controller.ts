@@ -27,6 +27,9 @@ import {
   RecoveryDataResponseDto,
   RegisterUserDto,
   SaltResponseDto,
+  SsoCallbackResponseDto,
+  SsoLookupResponseDto,
+  SsoStartResponseDto,
   TotpEnrollDto,
   TotpSetupResponseDto,
 } from './dto';
@@ -139,6 +142,37 @@ export class AuthController {
   @ZodResponse({ status: HttpStatus.OK, type: PreAuthResponseDto })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
+  }
+
+  @Public()
+  @Get('sso/lookup')
+  @HttpCode(HttpStatus.OK)
+  @ZodResponse({ status: HttpStatus.OK, type: SsoLookupResponseDto })
+  async lookupSsoRoute(
+    @Query('email', ParseEmailPipe) email: string,
+  ): Promise<SsoLookupResponseDto> {
+    return this.authService.lookupSsoRoute(email);
+  }
+
+  @Public()
+  @Get('sso/start')
+  @HttpCode(HttpStatus.OK)
+  @ZodResponse({ status: HttpStatus.OK, type: SsoStartResponseDto })
+  async startSso(
+    @Query('email', ParseEmailPipe) email: string,
+  ): Promise<SsoStartResponseDto> {
+    return this.authService.startSso(email);
+  }
+
+  @Public()
+  @Get('sso/callback')
+  @HttpCode(HttpStatus.OK)
+  @ZodResponse({ status: HttpStatus.OK, type: SsoCallbackResponseDto })
+  async completeSsoCallback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+  ): Promise<SsoCallbackResponseDto> {
+    return this.authService.completeSsoCallback(code, state);
   }
 
   /**

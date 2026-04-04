@@ -9,10 +9,13 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Sequelize } from 'sequelize-typescript';
+import { createHash } from 'crypto';
 import {
   OrganizationRepository,
   OrganizationMemberRepository,
   SessionRepository,
+  SsoConfigurationRepository,
+  SsoVerifiedDomainRepository,
   UsersRepository,
   VaultMemberRepository,
   VaultRepository,
@@ -24,6 +27,7 @@ import {
   OrganizationMemberRole,
   OrganizationMemberStatus,
   OrganizationType,
+  SsoProvider,
   User,
   VaultMemberRole,
 } from '../../../database/models';
@@ -40,9 +44,13 @@ import {
   SaltResponseDto,
   TotpEnrollDto,
   TotpSetupResponseDto,
+  SsoCallbackResponseDto,
+  SsoLookupResponseDto,
+  SsoStartResponseDto,
 } from './dto';
 import { accountRecoveryPayloadSchema } from '@repo/shared';
 import { TotpService } from 'src/common/services/totp.service';
+import { SsoConfig } from 'src/config/sso.config';
 
 // Number of failed TOTP attempts during registration / re-enrollment before lockout.
 const TOTP_REG_LOCKOUT_THRESHOLD = 5;
@@ -59,7 +67,10 @@ export class AuthService {
     private readonly organizationRepository: OrganizationRepository,
     private readonly organizationMemberRepository: OrganizationMemberRepository,
     private readonly sessionRepository: SessionRepository,
+    private readonly ssoConfigurationRepository: SsoConfigurationRepository,
+    private readonly ssoVerifiedDomainRepository: SsoVerifiedDomainRepository,
     private readonly jwtService: JwtService,
+    private readonly ssoConfig: SsoConfig,
     private readonly totpService: TotpService,
   ) {}
 
@@ -413,6 +424,134 @@ export class AuthService {
       requiresTotp: true,
       preAuthToken,
     } satisfies PreAuthResponseDto;
+  }
+
+  async lookupSsoRoute(email: string): Promise<SsoLookupResponseDto> {
+    const domain = this.extractEmailDomain(email);
+    const verifiedDomain = await this.ssoVerifiedDomainRepository.findByDomain(domain);
+
+    if (
+      !verifiedDomain ||
+      !verifiedDomain.verifiedAt ||
+      !verifiedDomain.ssoConfiguration?.isActive
+    ) {
+      return {
+        requiresSso: false,
+        organizationId: null,
+        provider: null,
+        primaryDomain: null,
+      };
+    }
+
+    return {
+      requiresSso: true,
+      organizationId: verifiedDomain.organizationId,
+      provider: verifiedDomain.ssoConfiguration.provider,
+      primaryDomain: verifiedDomain.domain,
+    };
+  }
+
+  async startSso(email: string): Promise<SsoStartResponseDto> {
+    const domain = this.extractEmailDomain(email);
+    const verifiedDomain = await this.ssoVerifiedDomainRepository.findByDomain(domain);
+
+    if (
+      !verifiedDomain ||
+      !verifiedDomain.verifiedAt ||
+      !verifiedDomain.ssoConfiguration?.isActive
+    ) {
+      throw new NotFoundException('No verified SSO route found for email domain');
+    }
+
+    const configuration = verifiedDomain.ssoConfiguration;
+    const state = this.jwtService.sign(
+      {
+        purpose: 'sso-state',
+        configId: configuration.id,
+        organizationId: configuration.organizationId,
+        emailDomain: domain,
+      },
+      {
+        secret: this.ssoConfig.stateSecret,
+        expiresIn: '10m',
+      },
+    );
+
+    const nonce = createHash('sha256').update(state).digest('hex').slice(0, 32);
+    const params = new URLSearchParams({
+      client_id: configuration.clientId,
+      response_type: 'code',
+      redirect_uri: configuration.redirectUri,
+      response_mode: 'query',
+      scope: configuration.scopes,
+      state,
+      nonce,
+      login_hint: email.toLowerCase().trim(),
+    });
+
+    return {
+      redirectUrl: `${configuration.authorizationEndpoint}?${params.toString()}`,
+      state,
+      organizationId: configuration.organizationId,
+      provider: configuration.provider,
+    };
+  }
+
+  async completeSsoCallback(
+    code: string,
+    state: string,
+  ): Promise<SsoCallbackResponseDto> {
+    if (!code || !state) {
+      throw new BadRequestException('Authorization code and state are required');
+    }
+
+    type SsoStatePayload = {
+      purpose: string;
+      configId: string;
+      organizationId: string;
+      emailDomain: string;
+      iat: number;
+      exp: number;
+    };
+
+    let payload: SsoStatePayload;
+    try {
+      payload = this.jwtService.verify<SsoStatePayload>(state, {
+        secret: this.ssoConfig.stateSecret,
+      });
+    } catch {
+      throw new UnauthorizedException('Invalid SSO state');
+    }
+
+    if (payload.purpose !== 'sso-state') {
+      throw new UnauthorizedException('Invalid SSO state');
+    }
+
+    const configuration =
+      await this.ssoConfigurationRepository.findByIdWithDomains(payload.configId);
+    if (
+      !configuration ||
+      !configuration.isActive ||
+      configuration.organizationId !== payload.organizationId
+    ) {
+      throw new UnauthorizedException('SSO configuration is unavailable');
+    }
+
+    const matchedDomain = configuration.domains?.find(
+      (domain) =>
+        domain.domain === payload.emailDomain && Boolean(domain.verifiedAt),
+    );
+    if (!matchedDomain) {
+      throw new UnauthorizedException('SSO domain is not verified');
+    }
+
+    return {
+      organizationId: configuration.organizationId,
+      provider: configuration.provider,
+      emailDomain: payload.emailDomain,
+      authorizationCode: code,
+      tokenExchangePending: true,
+    };
   }
 
   /**
@@ -870,5 +1009,13 @@ export class AuthService {
       organizationId: payload.organizationId,
       organizationType: payload.organizationType,
     };
+  }
+
+  private extractEmailDomain(email: string) {
+    const [, domain] = email.toLowerCase().trim().split('@');
+    if (!domain) {
+      throw new BadRequestException('Valid email is required');
+    }
+    return domain;
   }
 }

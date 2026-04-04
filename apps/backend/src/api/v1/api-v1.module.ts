@@ -6,6 +6,7 @@ import { FamilyModule } from './family/family.module';
 import { PasswordsModule } from './passwords/passwords.module';
 import { VaultsModule } from './vaults/vaults.module';
 import { UsersModule } from './users/users.module';
+import { SsoModule } from './sso/sso.module';
 import {
   MiddlewareConsumer,
   Module,
@@ -24,6 +25,7 @@ const API_V1_ROUTES: Routes = [
       { path: 'billing', module: BillingModule },
       { path: 'emergency-access', module: EmergencyAccessModule },
       { path: 'family', module: FamilyModule },
+      { path: 'sso', module: SsoModule },
       { path: 'passwords', module: PasswordsModule },
       { path: 'vaults', module: VaultsModule },
       { path: 'users', module: UsersModule },
@@ -38,6 +40,7 @@ const API_V1_ROUTES: Routes = [
     BillingModule,
     EmergencyAccessModule,
     FamilyModule,
+    SsoModule,
     PasswordsModule,
     VaultsModule,
     UsersModule,
@@ -51,6 +54,7 @@ export class ApiV1Module implements NestModule {
       .forRoutes(
         { path: 'api/v1/family*', method: RequestMethod.ALL },
         { path: 'api/v1/emergency-access*', method: RequestMethod.ALL },
+        { path: 'api/v1/sso*', method: RequestMethod.ALL },
         { path: 'api/v1/passwords*', method: RequestMethod.ALL },
         { path: 'api/v1/vaults*', method: RequestMethod.ALL },
       );

@@ -4,10 +4,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { JwtConfig, jwtConfiguration } from 'src/config/jwt.config';
+import { SsoConfig, ssoConfiguration } from 'src/config/sso.config';
 import { TotpConfig, totpConfiguration } from 'src/config/totp.config';
 import { Organization } from '../../../database/models/organization.model';
 import { OrganizationMember } from '../../../database/models/organization-member.model';
 import { Session } from '../../../database/models/session.model';
+import { SsoConfiguration } from '../../../database/models/sso-configuration.model';
+import { SsoVerifiedDomain } from '../../../database/models/sso-verified-domain.model';
 import { User } from '../../../database/models/user.model';
 import { VaultMember } from '../../../database/models/vault-member.model';
 import { Vault } from '../../../database/models/vault.model';
@@ -19,6 +22,8 @@ import {
   OrganizationRepository,
   OrganizationMemberRepository,
   SessionRepository,
+  SsoConfigurationRepository,
+  SsoVerifiedDomainRepository,
   UsersRepository,
   VaultMemberRepository,
   VaultRepository,
@@ -41,6 +46,7 @@ import { TotpService } from 'src/common/services/totp.service';
         };
       },
     }),
+    ConfigModule.forFeature(ssoConfiguration),
     ConfigModule.forFeature(totpConfiguration),
     SequelizeModule.forFeature([
       User,
@@ -49,6 +55,8 @@ import { TotpService } from 'src/common/services/totp.service';
       Session,
       Organization,
       OrganizationMember,
+      SsoConfiguration,
+      SsoVerifiedDomain,
     ]),
   ],
   controllers: [AuthController],
@@ -63,7 +71,10 @@ import { TotpService } from 'src/common/services/totp.service';
     OrganizationMemberRepository,
     OrganizationRepository,
     SessionRepository,
+    SsoConfigurationRepository,
+    SsoVerifiedDomainRepository,
     TotpConfig,
+    SsoConfig,
     TotpService,
   ],
   exports: [AuthService, JwtAuthGuard, PassportModule],
