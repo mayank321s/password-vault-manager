@@ -1,4 +1,5 @@
 import { OneTimeShare } from './one-time-share.model';
+import { OrganizationMember } from './organization-member.model';
 import { Organization } from './organization.model';
 import { PasswordPermission } from './password-permission.model';
 import { Password } from './password.model';
@@ -9,6 +10,11 @@ import { Session } from './session.model';
 
 export { User } from './user.model';
 export { Organization, OrganizationType } from './organization.model';
+export {
+  OrganizationMember,
+  OrganizationMemberRole,
+  OrganizationMemberStatus,
+} from './organization-member.model';
 export { Vault } from './vault.model';
 export { VaultMember, VaultMemberRole } from './vault-member.model';
 export { Password } from './password.model';
@@ -20,6 +26,7 @@ export { Session } from './session.model';
 export const models = [
   User,
   Organization,
+  OrganizationMember,
   Vault,
   VaultMember,
   Password,

@@ -14,6 +14,7 @@ import {
 } from 'sequelize-typescript';
 import { OneTimeShare } from './one-time-share.model';
 import { Organization } from './organization.model';
+import { OrganizationMember } from './organization-member.model';
 import { PasswordPermission } from './password-permission.model';
 import { Password } from './password.model';
 import { VaultMember } from './vault-member.model';
@@ -177,4 +178,7 @@ export class User extends Model<
 
   @HasMany(() => Organization, 'createdByUserId')
   createdOrganizations: Organization[];
+
+  @HasMany(() => OrganizationMember, 'userId')
+  organizationMemberships: OrganizationMember[];
 }

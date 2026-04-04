@@ -11,6 +11,7 @@ import {
   PrimaryKey,
   Table,
   UpdatedAt,
+  HasMany,
 } from 'sequelize-typescript';
 import {
   CreationOptional,
@@ -18,6 +19,7 @@ import {
   InferCreationAttributes,
 } from 'sequelize';
 import { User } from './user.model';
+import { OrganizationMember } from './organization-member.model';
 
 export const OrganizationType = {
   PERSONAL: 'personal',
@@ -74,5 +76,8 @@ export class Organization extends Model<
 
   @BelongsTo(() => User, 'createdByUserId')
   declare createdByUser: CreationOptional<User>;
+
+  @HasMany(() => OrganizationMember, 'organizationId')
+  declare members: OrganizationMember[];
 }
 
