@@ -106,6 +106,18 @@ export class SsoService {
         const existingDomains = await this.ssoVerifiedDomainRepository.findAllBy({
           ssoConfigurationId: savedConfiguration.id,
         });
+        const removedDomainIds = existingDomains
+          .filter((item) => !normalizedDomains.includes(item.domain))
+          .map((item) => item.id);
+
+        if (removedDomainIds.length > 0) {
+          await this.ssoVerifiedDomainRepository.delete(
+            {
+              id: removedDomainIds,
+            },
+            transaction,
+          );
+        }
 
         for (const domain of normalizedDomains) {
           const existingDomain = existingDomains.find((item) => item.domain === domain);
