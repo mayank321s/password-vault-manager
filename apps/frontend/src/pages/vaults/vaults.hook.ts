@@ -1,6 +1,7 @@
 import type { MouseEvent } from 'react';
 import { useEffect, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   useGetVaultPasswords,
   useGetVaults,
@@ -12,8 +13,10 @@ import { useGetPasswordDetail } from '../../hooks/usePasswordQueries';
 import { useState } from 'react';
 import { copyToClipboardSecure } from '../../utils/password-utils';
 import { SHARED_VAULT_ID } from '../../common/constants';
+import { passwordKeys, vaultKeys } from '../../common/constants/query-keys';
 
 export function useVaultDashboardPage() {
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { vaultId, passwordId } = useParams<{
     vaultId?: string;
@@ -145,12 +148,19 @@ export function useVaultDashboardPage() {
     navigate(`/vaults/${selectedVaultId}`);
   };
 
+  const handleOrganizationChanged = async () => {
+    await queryClient.invalidateQueries({ queryKey: vaultKeys.all });
+    await queryClient.invalidateQueries({ queryKey: passwordKeys.all });
+    navigate('/vaults', { replace: true });
+  };
+
   return {
     handleAddPassword,
     handleCloseCreatePassword,
     handleCopyToClipboard,
     handleDeletePassword,
     handleEditPassword,
+    handleOrganizationChanged,
     handleOpenSettings,
     handleSelectPassword,
     handleSelectVault,

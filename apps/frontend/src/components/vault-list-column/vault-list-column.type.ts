@@ -10,4 +10,5 @@ export interface VaultListColumnProps {
   onOpenSettings: (vaultId: string, e: MouseEvent<HTMLButtonElement>) => void;
   onCreateVault: () => void;
   onRetry: () => void;
+  onOrganizationChanged: () => void;
 }

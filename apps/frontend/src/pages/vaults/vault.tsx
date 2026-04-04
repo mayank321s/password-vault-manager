@@ -33,6 +33,7 @@ export default function VaultsPage() {
     handleAddPassword,
     handleCloseCreatePassword,
     handleSelectVault,
+    handleOrganizationChanged,
     handleOpenSettings,
     handleSelectPassword,
     handleCopyToClipboard,
@@ -60,6 +61,7 @@ export default function VaultsPage() {
           onOpenSettings={handleOpenSettings}
           onCreateVault={() => setIsCreateModalOpen(true)}
           onRetry={refetchVaults}
+          onOrganizationChanged={handleOrganizationChanged}
         />
 
         {showPasswordList && (
