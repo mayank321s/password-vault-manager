@@ -8,3 +8,4 @@ export * from './session.repository';
 export * from './password.repository';
 export * from './password-permission.repository';
 export * from './one-time-share.repository';
+export * from './stripe-webhook-event.repository';

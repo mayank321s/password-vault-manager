@@ -8,6 +8,7 @@ import { User } from './user.model';
 import { VaultMember } from './vault-member.model';
 import { Vault } from './vault.model';
 import { Session } from './session.model';
+import { StripeWebhookEvent } from './stripe-webhook-event.model';
 
 export { User } from './user.model';
 export { Organization, OrganizationType } from './organization.model';
@@ -23,6 +24,7 @@ export { Password } from './password.model';
 export { PasswordPermission } from './password-permission.model';
 export { OneTimeShare } from './one-time-share.model';
 export { Session } from './session.model';
+export { StripeWebhookEvent } from './stripe-webhook-event.model';
 
 // Array of all models for easy registration
 export const models = [
@@ -36,4 +38,5 @@ export const models = [
   PasswordPermission,
   OneTimeShare,
   Session,
+  StripeWebhookEvent,
 ];
