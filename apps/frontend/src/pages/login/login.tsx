@@ -18,6 +18,9 @@ export default function LoginPage() {
     progressTitle,
     totpCode,
     isProgressVisible,
+    isSsoRequired,
+    ssoLookupQuery,
+    startSsoMutation,
     loginMutation,
     loginWithTotpMutation,
     handleInputChange,
@@ -146,40 +149,54 @@ export default function LoginPage() {
                   >
                     Password
                   </label>
-                  <div className={styles.passwordInputGroup}>
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      id="masterPassword"
-                      className={`${formStyles.formInput} ${styles.passwordInput}`}
-                      value={formData.masterPassword}
-                      onChange={(e) =>
-                        handleInputChange('masterPassword', e.target.value)
-                      }
-                      placeholder="Enter your password"
-                      required
-                      autoComplete="current-password"
-                      disabled={loginMutation.isPending}
-                      maxLength={50}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className={styles.btnIcon}
-                      disabled={loginMutation.isPending}
-                      aria-label={
-                        showPassword ? 'Hide password' : 'Show password'
-                      }
-                    >
-                      {showPassword ? <IoMdEyeOff /> : <IoMdEye />}
-                    </button>
-                  </div>
+                  {isSsoRequired ? (
+                    <div className={styles.ssoCallout}>
+                      <p className={styles.ssoCalloutTitle}>
+                        This organization uses Microsoft Entra SSO
+                      </p>
+                      <p className={styles.ssoCalloutText}>
+                        Continue with your work email to sign in through the
+                        company identity provider instead of a local password.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className={styles.passwordInputGroup}>
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        id="masterPassword"
+                        className={`${formStyles.formInput} ${styles.passwordInput}`}
+                        value={formData.masterPassword}
+                        onChange={(e) =>
+                          handleInputChange('masterPassword', e.target.value)
+                        }
+                        placeholder="Enter your password"
+                        required
+                        autoComplete="current-password"
+                        disabled={loginMutation.isPending}
+                        maxLength={50}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className={styles.btnIcon}
+                        disabled={loginMutation.isPending}
+                        aria-label={
+                          showPassword ? 'Hide password' : 'Show password'
+                        }
+                      >
+                        {showPassword ? <IoMdEyeOff /> : <IoMdEye />}
+                      </button>
+                    </div>
+                  )}
                 </div>
 
-                <div style={{ textAlign: 'right', marginTop: '-0.5rem' }}>
-                  <a href="/recover" className={styles.btnLink}>
-                    Forgot your password?
-                  </a>
-                </div>
+                {!isSsoRequired && (
+                  <div style={{ textAlign: 'right', marginTop: '-0.5rem' }}>
+                    <a href="/recover" className={styles.btnLink}>
+                      Forgot your password?
+                    </a>
+                  </div>
+                )}
 
                 <div className={styles.infoBox}>
                   <p className={styles.infoText}>
@@ -187,6 +204,12 @@ export default function LoginPage() {
                     decryption happens locally on your device.
                   </p>
                 </div>
+
+                {ssoLookupQuery.isFetching && (
+                  <div className={styles.lookupHint}>
+                    Checking whether your organization requires SSO...
+                  </div>
+                )}
 
                 {loginMutation.isError && (
                   <div className={styles.errorBox}>
@@ -198,12 +221,34 @@ export default function LoginPage() {
                   </div>
                 )}
 
+                {startSsoMutation.isError && (
+                  <div className={styles.errorBox}>
+                    <p className={styles.errorText}>
+                      {startSsoMutation.error instanceof Error
+                        ? startSsoMutation.error.message
+                        : 'SSO sign-in could not be started.'}
+                    </p>
+                  </div>
+                )}
+
                 <button
                   type="submit"
                   className={button.primary}
-                  disabled={loginMutation.isPending}
+                  disabled={
+                    loginMutation.isPending ||
+                    startSsoMutation.isPending ||
+                    ssoLookupQuery.isFetching
+                  }
                 >
-                  {loginMutation.isPending ? 'Signing In...' : 'Sign In'}
+                  {isSsoRequired
+                    ? startSsoMutation.isPending
+                      ? 'Redirecting...'
+                      : 'Continue with Microsoft'
+                    : ssoLookupQuery.isFetching
+                      ? 'Checking organization...'
+                    : loginMutation.isPending
+                      ? 'Signing In...'
+                      : 'Sign In'}
                 </button>
 
                 <div className={styles.divider}>
