@@ -16,6 +16,7 @@ import { BillingService } from './billing.service';
 import {
   CreateCheckoutSessionRequestDto,
   CreateCheckoutSessionResponseDto,
+  SubscriptionStateDto,
 } from './dto';
 
 @Controller()
@@ -35,6 +36,13 @@ export class BillingController {
     @CurrentUser() user: CurrentUserData,
   ) {
     return this.billingService.createCheckoutSession(payload, user);
+  }
+
+  @Get('subscription')
+  @HttpCode(HttpStatus.OK)
+  @ZodResponse({ status: HttpStatus.OK, type: SubscriptionStateDto })
+  getCurrentSubscription(@CurrentUser() user: CurrentUserData) {
+    return this.billingService.getCurrentSubscription(user);
   }
 
   @Public()

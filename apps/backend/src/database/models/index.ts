@@ -1,6 +1,12 @@
 import { OneTimeShare } from './one-time-share.model';
 import { OrganizationMember } from './organization-member.model';
 import { OrganizationPolicy } from './organization-policy.model';
+import {
+  OrganizationSubscription,
+  SubscriptionBillingInterval,
+  SubscriptionLifecycleStatus,
+  SubscriptionPlanType,
+} from './organization-subscription.model';
 import { Organization } from './organization.model';
 import { PasswordPermission } from './password-permission.model';
 import { Password } from './password.model';
@@ -18,6 +24,12 @@ export {
   OrganizationMemberStatus,
 } from './organization-member.model';
 export { OrganizationPolicy } from './organization-policy.model';
+export {
+  OrganizationSubscription,
+  SubscriptionPlanType,
+  SubscriptionBillingInterval,
+  SubscriptionLifecycleStatus,
+} from './organization-subscription.model';
 export { Vault } from './vault.model';
 export { VaultMember, VaultMemberRole } from './vault-member.model';
 export { Password } from './password.model';
@@ -32,6 +44,7 @@ export const models = [
   Organization,
   OrganizationMember,
   OrganizationPolicy,
+  OrganizationSubscription,
   Vault,
   VaultMember,
   Password,
