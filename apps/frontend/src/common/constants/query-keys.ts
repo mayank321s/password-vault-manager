@@ -30,3 +30,8 @@ export const familyKeys = {
   members: (organizationId: string) =>
     [...familyKeys.all, organizationId, 'members'] as const,
 };
+
+export const emergencyAccessKeys = {
+  all: ['emergency-access'] as const,
+  lists: ['emergency-access', 'list'] as const,
+};

@@ -75,4 +75,12 @@ export const API_V1_ROUTES = {
     members: (organizationId: string) =>
       `${API_V1_PREFIX}/family/workspaces/${organizationId}/members`,
   },
+  emergencyAccess: {
+    list: `${API_V1_PREFIX}/emergency-access/grants`,
+    create: `${API_V1_PREFIX}/emergency-access/grants`,
+    accept: (grantId: string) =>
+      `${API_V1_PREFIX}/emergency-access/grants/${grantId}/accept`,
+    revoke: (grantId: string) =>
+      `${API_V1_PREFIX}/emergency-access/grants/${grantId}`,
+  },
 };

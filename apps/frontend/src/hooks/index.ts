@@ -4,4 +4,5 @@ export * from './useVaultMutations';
 export * from './usePasswordMutations';
 export * from './usePasswordQueries';
 export * from './useBilling';
+export * from './useEmergencyAccess';
 export * from './useFamily';

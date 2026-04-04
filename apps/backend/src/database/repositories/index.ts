@@ -8,5 +8,6 @@ export * from './vault.repository';
 export * from './session.repository';
 export * from './password.repository';
 export * from './password-permission.repository';
+export * from './emergency-access-grant.repository';
 export * from './one-time-share.repository';
 export * from './stripe-webhook-event.repository';

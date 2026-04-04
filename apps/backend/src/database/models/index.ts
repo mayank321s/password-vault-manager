@@ -1,3 +1,7 @@
+import {
+  EmergencyAccessGrant,
+  EmergencyAccessGrantStatus,
+} from './emergency-access-grant.model';
 import { OneTimeShare } from './one-time-share.model';
 import { OrganizationMember } from './organization-member.model';
 import { OrganizationPolicy } from './organization-policy.model';
@@ -34,6 +38,10 @@ export { Vault } from './vault.model';
 export { VaultMember, VaultMemberRole } from './vault-member.model';
 export { Password } from './password.model';
 export { PasswordPermission } from './password-permission.model';
+export {
+  EmergencyAccessGrant,
+  EmergencyAccessGrantStatus,
+} from './emergency-access-grant.model';
 export { OneTimeShare } from './one-time-share.model';
 export { Session } from './session.model';
 export { StripeWebhookEvent } from './stripe-webhook-event.model';
@@ -49,6 +57,7 @@ export const models = [
   VaultMember,
   Password,
   PasswordPermission,
+  EmergencyAccessGrant,
   OneTimeShare,
   Session,
   StripeWebhookEvent,
