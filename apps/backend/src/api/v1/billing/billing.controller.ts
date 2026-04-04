@@ -16,6 +16,7 @@ import { BillingService } from './billing.service';
 import {
   CreateCheckoutSessionRequestDto,
   CreateCheckoutSessionResponseDto,
+  EntitlementSummaryDto,
   SubscriptionStateDto,
 } from './dto';
 
@@ -43,6 +44,13 @@ export class BillingController {
   @ZodResponse({ status: HttpStatus.OK, type: SubscriptionStateDto })
   getCurrentSubscription(@CurrentUser() user: CurrentUserData) {
     return this.billingService.getCurrentSubscription(user);
+  }
+
+  @Get('entitlements')
+  @HttpCode(HttpStatus.OK)
+  @ZodResponse({ status: HttpStatus.OK, type: EntitlementSummaryDto })
+  getEntitlements(@CurrentUser() user: CurrentUserData) {
+    return this.billingService.getEntitlements(user);
   }
 
   @Public()

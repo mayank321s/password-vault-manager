@@ -13,11 +13,13 @@ import {
 import {
   CurrentUser,
   Public,
+  RequireEntitlement,
   RequireOrgPolicy,
   RequireOrgRoles,
   type CurrentUserData,
 } from '../../../common/decorators';
 import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
+import { EntitlementGuard } from 'src/common/guards/entitlement.guard';
 import { OrganizationPolicyGuard } from 'src/common/guards/organization-policy.guard';
 import { OrganizationRoleGuard } from 'src/common/guards/organization-role.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -50,6 +52,7 @@ import { OrganizationMemberRole } from 'src/database/models';
   TenantAccessGuard,
   OrganizationRoleGuard,
   OrganizationPolicyGuard,
+  EntitlementGuard,
 )
 export class PasswordsController {
   constructor(private readonly passwordsService: PasswordsService) {}
@@ -295,6 +298,7 @@ export class PasswordsController {
     OrganizationMemberRole.ADMIN,
     OrganizationMemberRole.MANAGER,
   )
+  @RequireEntitlement('externalShares')
   @RequireOrgPolicy({ allowExternalSharing: false })
   @ZodResponse({ status: HttpStatus.CREATED, type: OneTimeShareResponseDto })
   async createOneTimeShare(
