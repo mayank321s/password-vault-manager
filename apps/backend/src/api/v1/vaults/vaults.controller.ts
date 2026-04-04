@@ -12,6 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CurrentUser, type CurrentUserData } from '../../../common/decorators';
+import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
 
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
@@ -29,7 +30,7 @@ import {
 import { VaultsService } from './vaults.service';
 
 @Controller()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, TenantAccessGuard)
 export class VaultsController {
   constructor(private readonly vaultsService: VaultsService) {}
 

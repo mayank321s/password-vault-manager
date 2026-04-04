@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import {
+  OrganizationMember,
   Password,
   VaultMember,
   PasswordPermission,
@@ -9,6 +10,7 @@ import {
   Vault,
 } from 'src/database/models';
 import {
+  OrganizationMemberRepository,
   PasswordRepository,
   VaultMemberRepository,
   PasswordPermissionRepository,
@@ -19,6 +21,7 @@ import {
 import { PasswordsController } from './passwords.controller';
 import { PasswordsService } from './passwords.service';
 import { LoggerModule } from 'src/common/logger/logger.module';
+import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
 
 /**
  * Passwords Module
@@ -43,6 +46,7 @@ import { LoggerModule } from 'src/common/logger/logger.module';
       User,
       OneTimeShare,
       Vault,
+      OrganizationMember,
     ]),
     LoggerModule,
   ],
@@ -55,6 +59,8 @@ import { LoggerModule } from 'src/common/logger/logger.module';
     UsersRepository,
     OneTimeShareRepository,
     VaultRepository,
+    OrganizationMemberRepository,
+    TenantAccessGuard,
   ],
   exports: [PasswordsService],
 })

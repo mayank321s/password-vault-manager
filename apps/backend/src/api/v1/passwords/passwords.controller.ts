@@ -15,6 +15,7 @@ import {
   Public,
   type CurrentUserData,
 } from '../../../common/decorators';
+import { TenantAccessGuard } from 'src/common/guards/tenant-access.guard';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
   AccessOneTimeShareResponseDto,
@@ -39,7 +40,7 @@ import { ZodResponse } from 'nestjs-zod';
  * Authorization is enforced at service layer (vault membership verification)
  */
 @Controller()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, TenantAccessGuard)
 export class PasswordsController {
   constructor(private readonly passwordsService: PasswordsService) {}
 
