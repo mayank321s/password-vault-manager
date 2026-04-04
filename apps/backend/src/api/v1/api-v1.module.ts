@@ -1,6 +1,7 @@
 import { RouterModule, Routes } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
 import { BillingModule } from './billing/billing.module';
+import { FamilyModule } from './family/family.module';
 import { PasswordsModule } from './passwords/passwords.module';
 import { VaultsModule } from './vaults/vaults.module';
 import { UsersModule } from './users/users.module';
@@ -20,6 +21,7 @@ const API_V1_ROUTES: Routes = [
       { path: 'health', module: HealthModule },
       { path: 'auth', module: AuthModule },
       { path: 'billing', module: BillingModule },
+      { path: 'family', module: FamilyModule },
       { path: 'passwords', module: PasswordsModule },
       { path: 'vaults', module: VaultsModule },
       { path: 'users', module: UsersModule },
@@ -32,6 +34,7 @@ const API_V1_ROUTES: Routes = [
     RouterModule.register(API_V1_ROUTES),
     AuthModule,
     BillingModule,
+    FamilyModule,
     PasswordsModule,
     VaultsModule,
     UsersModule,
@@ -43,6 +46,7 @@ export class ApiV1Module implements NestModule {
     consumer
       .apply(TenantContextMiddleware)
       .forRoutes(
+        { path: 'api/v1/family*', method: RequestMethod.ALL },
         { path: 'api/v1/passwords*', method: RequestMethod.ALL },
         { path: 'api/v1/vaults*', method: RequestMethod.ALL },
       );
