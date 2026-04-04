@@ -172,6 +172,64 @@ export class BillingService {
     };
   }
 
+  async getInvoices(user: CurrentUserData) {
+    if (!user.organizationId) {
+      throw new BadRequestException('Organization context is required');
+    }
+
+    const subscription =
+      await this.organizationSubscriptionRepository.findOneBy({
+        organizationId: user.organizationId,
+      });
+    if (!subscription) {
+      return { invoices: [] };
+    }
+
+    const invoices = await this.stripe.invoices.list({
+      customer: subscription.stripeCustomerId,
+      limit: 12,
+    });
+
+    return {
+      invoices: invoices.data.map((invoice) => ({
+        invoiceId: invoice.id ?? '',
+        number: invoice.number ?? null,
+        status: invoice.status ?? null,
+        amountDue: invoice.amount_due,
+        amountPaid: invoice.amount_paid,
+        currency: invoice.currency,
+        hostedInvoiceUrl: invoice.hosted_invoice_url ?? null,
+        createdAt: new Date(invoice.created * 1000).toISOString(),
+      })),
+    };
+  }
+
+  async createBillingPortalSession(user: CurrentUserData) {
+    if (!user.organizationId) {
+      throw new BadRequestException('Organization context is required');
+    }
+
+    const subscription =
+      await this.organizationSubscriptionRepository.findOneBy({
+        organizationId: user.organizationId,
+      });
+    if (!subscription) {
+      throw new BadRequestException('No subscription found for organization');
+    }
+
+    const appConfig = this.configService.get<AppConfig>('app');
+    if (!appConfig) {
+      throw new BadRequestException('App configuration is incomplete');
+    }
+
+    const session = await this.stripe.billingPortal.sessions.create({
+      customer: subscription.stripeCustomerId,
+      return_url: `${appConfig.FRONTEND_URL}/settings/billing`,
+    });
+
+    return { url: session.url };
+  }
+
   async handleWebhook(rawBody: Buffer | undefined, stripeSignature?: string) {
     if (!stripeSignature || !rawBody) {
       throw new BadRequestException('Missing Stripe signature or raw payload');

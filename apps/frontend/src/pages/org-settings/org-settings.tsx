@@ -73,6 +73,13 @@ export default function OrgSettingsPage() {
           <p className={styles.sectionDescription}>
             {currentSection.description}
           </p>
+          {section === 'billing' && (
+            <p className={styles.sectionDescription} style={{ marginTop: '0.75rem' }}>
+              <Link to="/settings/billing" className={styles.billingLink}>
+                Open full billing settings
+              </Link>
+            </p>
+          )}
         </section>
       </div>
     </div>

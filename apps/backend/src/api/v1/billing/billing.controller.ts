@@ -14,9 +14,11 @@ import { CurrentUser, CurrentUserData, Public } from 'src/common/decorators';
 import { Request } from 'express';
 import { BillingService } from './billing.service';
 import {
+  BillingPortalSessionDto,
   CreateCheckoutSessionRequestDto,
   CreateCheckoutSessionResponseDto,
   EntitlementSummaryDto,
+  InvoiceListDto,
   SubscriptionStateDto,
 } from './dto';
 
@@ -51,6 +53,20 @@ export class BillingController {
   @ZodResponse({ status: HttpStatus.OK, type: EntitlementSummaryDto })
   getEntitlements(@CurrentUser() user: CurrentUserData) {
     return this.billingService.getEntitlements(user);
+  }
+
+  @Get('invoices')
+  @HttpCode(HttpStatus.OK)
+  @ZodResponse({ status: HttpStatus.OK, type: InvoiceListDto })
+  getInvoices(@CurrentUser() user: CurrentUserData) {
+    return this.billingService.getInvoices(user);
+  }
+
+  @Post('portal-session')
+  @HttpCode(HttpStatus.CREATED)
+  @ZodResponse({ status: HttpStatus.CREATED, type: BillingPortalSessionDto })
+  createBillingPortalSession(@CurrentUser() user: CurrentUserData) {
+    return this.billingService.createBillingPortalSession(user);
   }
 
   @Public()
