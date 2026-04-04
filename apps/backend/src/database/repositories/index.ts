@@ -1,6 +1,7 @@
 export * from './users.repository';
 export * from './organization.repository';
 export * from './organization-member.repository';
+export * from './organization-policy.repository';
 export * from './vault-member.repository';
 export * from './vault.repository';
 export * from './session.repository';

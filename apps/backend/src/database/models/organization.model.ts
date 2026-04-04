@@ -12,6 +12,7 @@ import {
   Table,
   UpdatedAt,
   HasMany,
+  HasOne,
 } from 'sequelize-typescript';
 import {
   CreationOptional,
@@ -20,6 +21,7 @@ import {
 } from 'sequelize';
 import { User } from './user.model';
 import { OrganizationMember } from './organization-member.model';
+import { OrganizationPolicy } from './organization-policy.model';
 
 export const OrganizationType = {
   PERSONAL: 'personal',
@@ -79,5 +81,8 @@ export class Organization extends Model<
 
   @HasMany(() => OrganizationMember, 'organizationId')
   declare members: OrganizationMember[];
+
+  @HasOne(() => OrganizationPolicy, 'organizationId')
+  declare policy: CreationOptional<OrganizationPolicy>;
 }
 

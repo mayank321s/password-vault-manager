@@ -1,5 +1,6 @@
 import { OneTimeShare } from './one-time-share.model';
 import { OrganizationMember } from './organization-member.model';
+import { OrganizationPolicy } from './organization-policy.model';
 import { Organization } from './organization.model';
 import { PasswordPermission } from './password-permission.model';
 import { Password } from './password.model';
@@ -15,6 +16,7 @@ export {
   OrganizationMemberRole,
   OrganizationMemberStatus,
 } from './organization-member.model';
+export { OrganizationPolicy } from './organization-policy.model';
 export { Vault } from './vault.model';
 export { VaultMember, VaultMemberRole } from './vault-member.model';
 export { Password } from './password.model';
@@ -27,6 +29,7 @@ export const models = [
   User,
   Organization,
   OrganizationMember,
+  OrganizationPolicy,
   Vault,
   VaultMember,
   Password,
