@@ -29,7 +29,7 @@ This command:
 
 - Executes the current backend test suite
 - Executes extension package tests
-- Builds the shared contract package from a clean workspace path
+- Builds the shared, crypto, and extension workspace packages from a clean workspace path
 - Verifies backend production build
 - Verifies frontend type safety
 - Verifies frontend production build

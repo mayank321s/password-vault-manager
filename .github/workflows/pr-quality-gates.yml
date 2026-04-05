@@ -40,6 +40,12 @@ jobs:
       - name: Shared package build
         run: pnpm --filter @repo/shared build
 
+      - name: Crypto package build
+        run: pnpm --filter @repo/crypto-utils build
+
+      - name: Extension package build
+        run: pnpm --filter @repo/extension-core build
+
       - name: Backend build
         run: pnpm --filter backend build
 

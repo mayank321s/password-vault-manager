@@ -29,6 +29,16 @@ const automatedSuites = [
     covers: ['auth', 'vault', 'billing', 'tenant boundaries', 'SSO/SCIM', 'shared contracts'],
   },
   {
+    name: 'Crypto package build',
+    command: 'pnpm --filter @repo/crypto-utils build',
+    covers: ['auth', 'vault', 'family onboarding', 'frontend crypto flows'],
+  },
+  {
+    name: 'Extension package build',
+    command: 'pnpm --filter @repo/extension-core build',
+    covers: ['extension', 'frontend extension bridge'],
+  },
+  {
     name: 'Backend production build',
     command: 'pnpm --filter backend build',
     covers: ['auth', 'vault', 'billing', 'tenant boundaries', 'SSO/SCIM'],

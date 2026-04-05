@@ -1,6 +1,6 @@
 # Master Regression Evidence
 
-- Generated at: 2026-04-05T08:21:15.039Z
+- Generated at: 2026-04-05T08:24:15.963Z
 - Repository: `D:\work\password-manager-dev`
 - Overall automated status: passed
 
@@ -10,8 +10,8 @@
 - Status: passed
 - Covers: auth, vault, billing, tenant boundaries, SSO/SCIM
 - Command: `pnpm --filter backend exec jest --runInBand --passWithNoTests`
-- Started: 2026-04-05T08:21:15.039Z
-- Finished: 2026-04-05T08:21:17.736Z
+- Started: 2026-04-05T08:24:15.963Z
+- Finished: 2026-04-05T08:24:18.651Z
 
 ```text
 --------------------------------------------------------------|---------|----------|---------|---------|-----------------------------------------------------------------
@@ -233,8 +233,8 @@ All files                                                     |    3.34 |    31.
 - Status: passed
 - Covers: extension
 - Command: `pnpm --filter @repo/extension-core run test`
-- Started: 2026-04-05T08:21:17.736Z
-- Finished: 2026-04-05T08:21:19.232Z
+- Started: 2026-04-05T08:24:18.651Z
+- Finished: 2026-04-05T08:24:19.859Z
 
 ```text
 > @repo/extension-core@0.0.0 test D:\work\password-manager-dev\packages\extension-core
@@ -244,21 +244,21 @@ All files                                                     |    3.34 |    31.
 [7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mD:/work/password-manager-dev/packages/extension-core[39m
 
  [32m✓[39m src/cross-browser.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 2[2mms[22m[39m
- [32m✓[39m src/chromium.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 2[2mms[22m[39m
- [32m✓[39m src/trust.test.ts [2m ([22m[2m5 tests[22m[2m)[22m[90m 2[2mms[22m[39m
+ [32m✓[39m src/chromium.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+ [32m✓[39m src/trust.test.ts [2m ([22m[2m5 tests[22m[2m)[22m[90m 3[2mms[22m[39m
 
 [2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
 [2m      Tests [22m [1m[32m12 passed[39m[22m[90m (12)[39m
-[2m   Start at [22m 13:51:18
-[2m   Duration [22m 628ms[2m (transform 389ms, setup 0ms, collect 1.04s, tests 6ms, environment 1ms, prepare 326ms)[22m
+[2m   Start at [22m 13:54:19
+[2m   Duration [22m 335ms[2m (transform 99ms, setup 0ms, collect 196ms, tests 8ms, environment 0ms, prepare 288ms)[22m
 ```
 
 ### Shared package build
 - Status: passed
 - Covers: auth, vault, billing, tenant boundaries, SSO/SCIM, shared contracts
 - Command: `pnpm --filter @repo/shared build`
-- Started: 2026-04-05T08:21:19.232Z
-- Finished: 2026-04-05T08:21:20.764Z
+- Started: 2026-04-05T08:24:19.859Z
+- Finished: 2026-04-05T08:24:21.378Z
 
 ```text
 > @repo/shared@0.0.0 build D:\work\password-manager-dev\packages\shared
@@ -270,22 +270,76 @@ All files                                                     |    3.34 |    31.
 [34mCLI[39m Target: es2022
 [34mCJS[39m Build start
 [34mESM[39m Build start
-[32mESM[39m [1mdist\index.mjs [22m[32m15.57 KB[39m
-[32mESM[39m ⚡️ Build success in 88ms
 [32mCJS[39m [1mdist\index.js [22m[32m23.05 KB[39m
-[32mCJS[39m ⚡️ Build success in 88ms
+[32mCJS[39m ⚡️ Build success in 21ms
+[32mESM[39m [1mdist\index.mjs [22m[32m15.57 KB[39m
+[32mESM[39m ⚡️ Build success in 21ms
 [34mDTS[39m Build start
-[32mDTS[39m ⚡️ Build success in 692ms
+[32mDTS[39m ⚡️ Build success in 695ms
 [32mDTS[39m [1mdist\index.d.ts  [22m[32m42.37 KB[39m
 [32mDTS[39m [1mdist\index.d.mts [22m[32m42.37 KB[39m
+```
+
+### Crypto package build
+- Status: passed
+- Covers: auth, vault, family onboarding, frontend crypto flows
+- Command: `pnpm --filter @repo/crypto-utils build`
+- Started: 2026-04-05T08:24:21.378Z
+- Finished: 2026-04-05T08:24:22.830Z
+
+```text
+> @repo/crypto-utils@0.0.0 build D:\work\password-manager-dev\packages\crypto-utils
+> tsup src/index.ts --format cjs,esm --dts
+
+[34mCLI[39m Building entry: src/index.ts
+[34mCLI[39m Using tsconfig: tsconfig.json
+[34mCLI[39m tsup v8.5.1
+[34mCLI[39m Target: es2022
+[34mCJS[39m Build start
+[34mESM[39m Build start
+[32mCJS[39m [1mdist\index.js [22m[32m19.65 KB[39m
+[32mCJS[39m ⚡️ Build success in 51ms
+[32mESM[39m [1mdist\index.mjs [22m[32m16.38 KB[39m
+[32mESM[39m ⚡️ Build success in 52ms
+[34mDTS[39m Build start
+[32mDTS[39m ⚡️ Build success in 611ms
+[32mDTS[39m [1mdist\index.d.ts  [22m[32m10.20 KB[39m
+[32mDTS[39m [1mdist\index.d.mts [22m[32m10.20 KB[39m
+```
+
+### Extension package build
+- Status: passed
+- Covers: extension, frontend extension bridge
+- Command: `pnpm --filter @repo/extension-core build`
+- Started: 2026-04-05T08:24:22.830Z
+- Finished: 2026-04-05T08:24:24.101Z
+
+```text
+> @repo/extension-core@0.0.0 build D:\work\password-manager-dev\packages\extension-core
+> tsup src/index.ts --format cjs,esm --dts
+
+[34mCLI[39m Building entry: src/index.ts
+[34mCLI[39m Using tsconfig: tsconfig.json
+[34mCLI[39m tsup v8.5.1
+[34mCLI[39m Target: es2022
+[34mCJS[39m Build start
+[34mESM[39m Build start
+[32mESM[39m [1mdist\index.mjs [22m[32m12.57 KB[39m
+[32mESM[39m ⚡️ Build success in 41ms
+[32mCJS[39m [1mdist\index.js [22m[32m14.60 KB[39m
+[32mCJS[39m ⚡️ Build success in 42ms
+[34mDTS[39m Build start
+[32mDTS[39m ⚡️ Build success in 430ms
+[32mDTS[39m [1mdist\index.d.ts  [22m[32m8.22 KB[39m
+[32mDTS[39m [1mdist\index.d.mts [22m[32m8.22 KB[39m
 ```
 
 ### Backend production build
 - Status: passed
 - Covers: auth, vault, billing, tenant boundaries, SSO/SCIM
 - Command: `pnpm --filter backend build`
-- Started: 2026-04-05T08:21:20.764Z
-- Finished: 2026-04-05T08:21:25.866Z
+- Started: 2026-04-05T08:24:24.101Z
+- Finished: 2026-04-05T08:24:29.075Z
 
 ```text
 > backend@0.0.0 build D:\work\password-manager-dev\apps\backend
@@ -296,8 +350,8 @@ All files                                                     |    3.34 |    31.
 - Status: passed
 - Covers: auth, vault, billing, extension onboarding, admin surfaces
 - Command: `pnpm --filter frontend run check-types`
-- Started: 2026-04-05T08:21:25.866Z
-- Finished: 2026-04-05T08:21:28.651Z
+- Started: 2026-04-05T08:24:29.075Z
+- Finished: 2026-04-05T08:24:31.982Z
 
 ```text
 > frontend@0.1.0 check-types D:\work\password-manager-dev\apps\frontend
@@ -308,8 +362,8 @@ All files                                                     |    3.34 |    31.
 - Status: passed
 - Covers: auth, vault, billing, admin surfaces, import UX
 - Command: `pnpm --filter frontend build`
-- Started: 2026-04-05T08:21:28.651Z
-- Finished: 2026-04-05T08:21:37.956Z
+- Started: 2026-04-05T08:24:31.982Z
+- Finished: 2026-04-05T08:24:43.563Z
 
 ```text
 > frontend@0.1.0 build D:\work\password-manager-dev\apps\frontend
@@ -388,7 +442,7 @@ computing gzip size...
 [2mdist/[22m[36massets/org-settings-BCWglEwF.js            [39m[1m[2m 46.16 kB[22m[1m[22m[2m │ gzip: 13.83 kB[22m
 [2mdist/[22m[36massets/crypto-DDDKealD.js                  [39m[1m[2m225.99 kB[22m[1m[22m[2m │ gzip: 95.10 kB[22m
 [2mdist/[22m[36massets/index-CPmo6oJH.js                   [39m[1m[2m304.85 kB[22m[1m[22m[2m │ gzip: 98.78 kB[22m
-[32m✓ built in 6.01s[39m
+[32m✓ built in 7.03s[39m
 ```
 
 ## Manual Certification Checklist
