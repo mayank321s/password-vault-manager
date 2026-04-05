@@ -17,7 +17,8 @@
     "migrate:down": "ts-node src/database/migrate.ts down",
     "migrate:pending": "ts-node src/database/migrate.ts pending",
     "migrate:executed": "ts-node src/database/migrate.ts executed",
-    "migrate:create": "ts-node src/database/migrate.ts create"
+    "migrate:create": "ts-node src/database/migrate.ts create",
+    "migrate:check": "ts-node src/database/check-no-pending-migrations.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.11",

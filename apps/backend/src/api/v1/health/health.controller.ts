@@ -20,6 +20,34 @@ export class HealthController {
     };
   }
 
+  @Get('live')
+  checkLiveness() {
+    return {
+      status: 'live',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+    };
+  }
+
+  @Get('ready')
+  async checkReadiness() {
+    try {
+      await this.sequelize.authenticate();
+      return {
+        status: 'ready',
+        database: 'connected',
+        timestamp: new Date().toISOString(),
+      };
+    } catch (error) {
+      return {
+        status: 'not_ready',
+        database: 'disconnected',
+        error: (error as Error).message,
+        timestamp: new Date().toISOString(),
+      };
+    }
+  }
+
   @Get('db')
   async checkDatabase() {
     try {
