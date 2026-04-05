@@ -4,6 +4,7 @@ import { AuditSettingsPanel } from './audit-settings-panel';
 import { useOrganizationContext } from '../../contexts/OrganizationContext';
 import { IdentitySettingsPanel } from './identity-settings-panel';
 import { PolicySettingsPanel } from './policy-settings-panel';
+import { SecurityOpsPanel } from './security-ops-panel';
 import * as styles from './org-settings.css';
 
 const sections = [
@@ -20,6 +21,13 @@ const sections = [
     title: 'Audit and Reporting',
     description:
       'Review admin activity, filter event history, and export compliance-friendly audit data.',
+  },
+  {
+    key: 'security-ops',
+    label: 'Security Ops',
+    title: 'Security Operations Center',
+    description:
+      'Track identity posture, provisioning health, alert baselines, and incident runbooks from one launch-ready admin surface.',
   },
   {
     key: 'billing',
@@ -132,6 +140,14 @@ export default function OrgSettingsPage() {
           {section === 'audit' && (
             <div className={styles.embeddedSection}>
               <AuditSettingsPanel
+                organizationId={activeOrganizationId}
+                organizationType={activeOrganizationType}
+              />
+            </div>
+          )}
+          {section === 'security-ops' && (
+            <div className={styles.embeddedSection}>
+              <SecurityOpsPanel
                 organizationId={activeOrganizationId}
                 organizationType={activeOrganizationType}
               />

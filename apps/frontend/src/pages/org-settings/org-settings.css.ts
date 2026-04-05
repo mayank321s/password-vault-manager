@@ -285,6 +285,24 @@ export const domainBadgeVerified = style({
   fontWeight: 700,
 });
 
+export const domainBadgeCritical = style({
+  borderRadius: '999px',
+  backgroundColor: 'rgba(248, 113, 113, 0.16)',
+  color: '#fca5a5',
+  padding: '0.3rem 0.7rem',
+  fontSize: '0.75rem',
+  fontWeight: 700,
+});
+
+export const domainBadgeInfo = style({
+  borderRadius: '999px',
+  backgroundColor: 'rgba(125, 211, 252, 0.16)',
+  color: '#7dd3fc',
+  padding: '0.3rem 0.7rem',
+  fontSize: '0.75rem',
+  fontWeight: 700,
+});
+
 export const tokenLabel = style({
   margin: 0,
   color: '#cbd5e1',
@@ -368,4 +386,34 @@ export const logCard = style({
   display: 'flex',
   flexDirection: 'column',
   gap: '0.45rem',
+});
+
+export const warningPanel = style({
+  borderRadius: '14px',
+  border: '1px solid rgba(250, 204, 21, 0.24)',
+  backgroundColor: 'rgba(113, 63, 18, 0.18)',
+  padding: '0.9rem',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.45rem',
+});
+
+export const warningTitle = style({
+  margin: 0,
+  color: '#fde68a',
+  fontSize: '0.9rem',
+  fontWeight: 700,
+});
+
+export const runbookList = style({
+  margin: 0,
+  paddingLeft: '1.1rem',
+  display: 'grid',
+  gap: '0.5rem',
+  color: '#cbd5e1',
+});
+
+export const runbookStep = style({
+  fontSize: '0.84rem',
+  lineHeight: 1.55,
 });
