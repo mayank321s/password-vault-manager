@@ -1,5 +1,6 @@
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { useMemo } from 'react';
+import { AuditSettingsPanel } from './audit-settings-panel';
 import { useOrganizationContext } from '../../contexts/OrganizationContext';
 import { IdentitySettingsPanel } from './identity-settings-panel';
 import { PolicySettingsPanel } from './policy-settings-panel';
@@ -12,6 +13,13 @@ const sections = [
     title: 'Organization Policy Settings',
     description:
       'Configure organization-wide security controls such as MFA requirements, sharing restrictions, and session behavior.',
+  },
+  {
+    key: 'audit',
+    label: 'Audit',
+    title: 'Audit and Reporting',
+    description:
+      'Review admin activity, filter event history, and export compliance-friendly audit data.',
   },
   {
     key: 'billing',
@@ -116,6 +124,14 @@ export default function OrgSettingsPage() {
           {section === 'policy' && (
             <div className={styles.embeddedSection}>
               <PolicySettingsPanel
+                organizationId={activeOrganizationId}
+                organizationType={activeOrganizationType}
+              />
+            </div>
+          )}
+          {section === 'audit' && (
+            <div className={styles.embeddedSection}>
+              <AuditSettingsPanel
                 organizationId={activeOrganizationId}
                 organizationType={activeOrganizationType}
               />

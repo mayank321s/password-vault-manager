@@ -173,6 +173,12 @@ export const inlineHint = style({
   lineHeight: 1.5,
 });
 
+export const buttonRow = style({
+  display: 'flex',
+  gap: '0.75rem',
+  flexWrap: 'wrap',
+});
+
 export const primaryButton = style({
   minHeight: '44px',
   border: 'none',

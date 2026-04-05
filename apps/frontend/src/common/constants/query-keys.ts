@@ -31,6 +31,14 @@ export const policyKeys = {
     ['policy', 'current', organizationId ?? 'none'] as const,
 };
 
+export const auditKeys = {
+  all: ['audit'] as const,
+  events: (
+    organizationId: string | null,
+    filters: unknown,
+  ) => ['audit', 'events', organizationId ?? 'none', filters] as const,
+};
+
 export const familyKeys = {
   all: ['family'] as const,
   members: (organizationId: string) =>
