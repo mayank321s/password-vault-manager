@@ -201,7 +201,10 @@ export default function ExtensionOnboardingPage() {
                   Mark Setup Complete
                 </button>
               )}
-              <Link className={styles.helperLink} to="/settings/organization/security">
+              <Link
+                className={styles.helperLink}
+                to="/settings/organization/security-ops"
+              >
                 Review security settings
               </Link>
             </div>
