@@ -51,16 +51,23 @@ export default function PasswordListColumn({
       <div className={styles.passwordListHeader}>
         <div className={styles.vaultNameRow}>
           <div className={styles.passwordListVaultName}>{vaultName}</div>
-          {!hideAddButton && (
-            <button
-              className={styles.addPasswordButton}
-              onClick={onAddPassword}
-              title="Add password"
-              aria-label="Add password"
-            >
-              +
-            </button>
-          )}
+          <div className={styles.headerActions}>
+            {!hideAddButton && (
+              <Link className={styles.importLink} to="/import">
+                Import
+              </Link>
+            )}
+            {!hideAddButton && (
+              <button
+                className={styles.addPasswordButton}
+                onClick={onAddPassword}
+                title="Add password"
+                aria-label="Add password"
+              >
+                +
+              </button>
+            )}
+          </div>
         </div>
         <div className={styles.searchWrapper}>
           <span className={styles.searchIcon}>🔍</span>
@@ -123,6 +130,11 @@ export default function PasswordListColumn({
                 ? 'No passwords match your search.'
                 : 'No passwords in this vault yet.'}
             </div>
+            {!searchValue && !hideAddButton && (
+              <Link className={styles.emptyImportLink} to="/import">
+                Import from another password manager
+              </Link>
+            )}
           </div>
         )}
 

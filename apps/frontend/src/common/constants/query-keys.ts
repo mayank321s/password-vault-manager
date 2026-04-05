@@ -65,3 +65,9 @@ export const scimKeys = {
   diagnostics: (organizationId: string | null) =>
     ['scim', 'diagnostics', organizationId ?? 'none'] as const,
 };
+
+export const importKeys = {
+  all: ['imports'] as const,
+  parse: (provider: string, contentHash: string) =>
+    ['imports', 'parse', provider, contentHash] as const,
+};
