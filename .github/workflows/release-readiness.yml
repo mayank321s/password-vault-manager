@@ -35,10 +35,19 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Backend unit tests
-        run: pnpm --filter backend run test -- --runInBand --passWithNoTests
+        run: pnpm --filter backend exec jest --runInBand --passWithNoTests
 
       - name: Extension package tests
         run: pnpm --filter @repo/extension-core run test
+
+      - name: Shared package build
+        run: pnpm --filter @repo/shared build
+
+      - name: Crypto package build
+        run: pnpm --filter @repo/crypto-utils build
+
+      - name: Extension package build
+        run: pnpm --filter @repo/extension-core build
 
       - name: Backend build
         run: pnpm --filter backend build
@@ -130,6 +139,7 @@ jobs:
       JWT_EXPIRATION: 1h
       JWT_REFRESH_EXPIRATION: 7d
       ARGON2_SERVER_SALT: test-argon-salt-with-sufficient-length-for-ci
+      TOTP_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
       NODE_ENV: test
     steps:
       - name: Checkout
@@ -151,6 +161,9 @@ jobs:
 
       - name: Apply migrations
         run: pnpm --filter backend run migrate:up
+
+      - name: Build shared package
+        run: pnpm --filter @repo/shared build
 
       - name: Build backend
         run: pnpm --filter backend build

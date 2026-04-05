@@ -1,7 +1,9 @@
 import { DataTypes, QueryInterface } from 'sequelize';
+import type { MigrationFn } from 'umzug';
 
-export async function up(queryInterface: QueryInterface) {
-  await queryInterface.createTable('sso_configurations', {
+export const up: MigrationFn<QueryInterface> = async ({ context: queryInterface }) => {
+  return queryInterface.sequelize.transaction(async (transaction) => {
+    await queryInterface.createTable('sso_configurations', {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -71,14 +73,18 @@ export async function up(queryInterface: QueryInterface) {
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
-  });
+    }, { transaction });
 
-  await queryInterface.addIndex('sso_configurations', ['organization_id'], {
-    unique: true,
-    name: 'sso_configurations_organization_id_unique_idx',
+    await queryInterface.addIndex('sso_configurations', ['organization_id'], {
+      unique: true,
+      name: 'sso_configurations_organization_id_unique_idx',
+      transaction,
+    });
   });
-}
+};
 
-export async function down(queryInterface: QueryInterface) {
-  await queryInterface.dropTable('sso_configurations');
-}
+export const down: MigrationFn<QueryInterface> = async ({ context: queryInterface }) => {
+  return queryInterface.sequelize.transaction(async (transaction) => {
+    await queryInterface.dropTable('sso_configurations', { transaction });
+  });
+};

@@ -64,12 +64,18 @@ export class ApiV1Module implements NestModule {
     consumer
       .apply(TenantContextMiddleware)
       .forRoutes(
-        { path: 'api/v1/family*', method: RequestMethod.ALL },
-        { path: 'api/v1/emergency-access*', method: RequestMethod.ALL },
-        { path: 'api/v1/sso*', method: RequestMethod.ALL },
-        { path: 'api/v1/scim*', method: RequestMethod.ALL },
-        { path: 'api/v1/passwords*', method: RequestMethod.ALL },
-        { path: 'api/v1/vaults*', method: RequestMethod.ALL },
+        { path: 'api/v1/family', method: RequestMethod.ALL },
+        { path: 'api/v1/family/*path', method: RequestMethod.ALL },
+        { path: 'api/v1/emergency-access', method: RequestMethod.ALL },
+        { path: 'api/v1/emergency-access/*path', method: RequestMethod.ALL },
+        { path: 'api/v1/sso', method: RequestMethod.ALL },
+        { path: 'api/v1/sso/*path', method: RequestMethod.ALL },
+        { path: 'api/v1/scim', method: RequestMethod.ALL },
+        { path: 'api/v1/scim/*path', method: RequestMethod.ALL },
+        { path: 'api/v1/passwords', method: RequestMethod.ALL },
+        { path: 'api/v1/passwords/*path', method: RequestMethod.ALL },
+        { path: 'api/v1/vaults', method: RequestMethod.ALL },
+        { path: 'api/v1/vaults/*path', method: RequestMethod.ALL },
       );
   }
 }
