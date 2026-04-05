@@ -26,6 +26,7 @@ import {
   ScimProvisioningEventStatus,
 } from './scim-provisioning-event.model';
 import { ScimToken } from './scim-token.model';
+import { AuditEvent } from './audit-event.model';
 
 export { User } from './user.model';
 export { Organization, OrganizationType } from './organization.model';
@@ -57,6 +58,7 @@ export {
   ScimProvisioningEventStatus,
 } from './scim-provisioning-event.model';
 export { ScimToken } from './scim-token.model';
+export { AuditEvent } from './audit-event.model';
 export { OneTimeShare } from './one-time-share.model';
 export { Session } from './session.model';
 export { StripeWebhookEvent } from './stripe-webhook-event.model';
@@ -77,6 +79,7 @@ export const models = [
   SsoVerifiedDomain,
   ScimToken,
   ScimProvisioningEvent,
+  AuditEvent,
   OneTimeShare,
   Session,
   StripeWebhookEvent,

@@ -1,4 +1,5 @@
 export * from './users.repository';
+export * from './audit-event.repository';
 export * from './organization.repository';
 export * from './organization-member.repository';
 export * from './organization-policy.repository';

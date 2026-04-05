@@ -4,6 +4,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { CurrentUserData } from 'src/common/decorators';
+import { AuditService } from 'src/common/services/audit.service';
 import {
   OrganizationMemberRole,
   OrganizationMemberStatus,
@@ -25,6 +26,7 @@ export class PoliciesService {
     private readonly organizationRepository: OrganizationRepository,
     private readonly organizationMemberRepository: OrganizationMemberRepository,
     private readonly organizationPolicyRepository: OrganizationPolicyRepository,
+    private readonly auditService: AuditService,
   ) {}
 
   async getCurrentPolicy(
@@ -68,7 +70,22 @@ export class PoliciesService {
           policyVersion: 'v1',
         });
 
-    return this.toResponse(policy);
+    const response = this.toResponse(policy);
+
+    await this.auditService.recordFromUser(user, {
+      action: 'organization_policy.updated',
+      targetType: 'organization_policy',
+      targetId: organizationId,
+      targetLabel: 'Organization policy',
+      metadata: {
+        requireMfa: response.requireMfa,
+        restrictExternalSharing: response.restrictExternalSharing,
+        sessionTimeoutMinutes: response.sessionTimeoutMinutes,
+        maxDevicesPerUser: response.maxDevicesPerUser,
+      },
+    });
+
+    return response;
   }
 
   private async requireBusinessOrganizationAdmin(user: CurrentUserData) {

@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { AuditService } from 'src/common/services/audit.service';
 import {
+  AuditEvent,
   Organization,
   OrganizationMember,
   SsoConfiguration,
   SsoVerifiedDomain,
 } from 'src/database/models';
 import {
+  AuditEventRepository,
   OrganizationMemberRepository,
   OrganizationRepository,
   SsoConfigurationRepository,
@@ -23,6 +26,7 @@ import { SsoService } from './sso.service';
     SequelizeModule.forFeature([
       Organization,
       OrganizationMember,
+      AuditEvent,
       SsoConfiguration,
       SsoVerifiedDomain,
     ]),
@@ -30,6 +34,8 @@ import { SsoService } from './sso.service';
   controllers: [SsoController],
   providers: [
     SsoService,
+    AuditService,
+    AuditEventRepository,
     SsoConfigurationRepository,
     SsoVerifiedDomainRepository,
     OrganizationRepository,

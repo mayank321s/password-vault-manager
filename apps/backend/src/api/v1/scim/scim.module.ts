@@ -2,7 +2,9 @@ import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { OrganizationRoleGuard } from 'src/common/guards/organization-role.guard';
 import { ScimTokenAuthGuard } from 'src/common/guards/scim-token-auth.guard';
+import { AuditService } from 'src/common/services/audit.service';
 import {
+  AuditEvent,
   Organization,
   OrganizationMember,
   ScimProvisioningEvent,
@@ -10,6 +12,7 @@ import {
   User,
 } from 'src/database/models';
 import {
+  AuditEventRepository,
   OrganizationMemberRepository,
   OrganizationRepository,
   ScimProvisioningEventRepository,
@@ -25,6 +28,7 @@ import { ScimService } from './scim.service';
     SequelizeModule.forFeature([
       Organization,
       OrganizationMember,
+      AuditEvent,
       ScimProvisioningEvent,
       ScimToken,
       User,
@@ -34,6 +38,8 @@ import { ScimService } from './scim.service';
   providers: [
     ScimService,
     ScimAdminService,
+    AuditService,
+    AuditEventRepository,
     OrganizationRepository,
     OrganizationMemberRepository,
     ScimProvisioningEventRepository,
