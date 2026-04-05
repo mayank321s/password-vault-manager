@@ -3,6 +3,8 @@ import type { ExtensionSessionSnapshot } from './session';
 
 export const EXTENSION_SESSION_EVENT =
   'password-manager:extension-session-changed';
+export const EXTENSION_CREDENTIALS_EVENT =
+  'password-manager:extension-credentials-loaded';
 
 export type ExtensionRuntimeMessage =
   | {
