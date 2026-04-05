@@ -40,6 +40,9 @@ jobs:
       - name: Extension package tests
         run: pnpm --filter @repo/extension-core run test
 
+      - name: Shared package build
+        run: pnpm --filter @repo/shared build
+
       - name: Backend build
         run: pnpm --filter backend build
 
@@ -151,6 +154,9 @@ jobs:
 
       - name: Apply migrations
         run: pnpm --filter backend run migrate:up
+
+      - name: Build shared package
+        run: pnpm --filter @repo/shared build
 
       - name: Build backend
         run: pnpm --filter backend build

@@ -1,6 +1,6 @@
 # Master Regression Evidence
 
-- Generated at: 2026-04-05T08:15:10.257Z
+- Generated at: 2026-04-05T08:21:15.039Z
 - Repository: `D:\work\password-manager-dev`
 - Overall automated status: passed
 
@@ -10,14 +10,14 @@
 - Status: passed
 - Covers: auth, vault, billing, tenant boundaries, SSO/SCIM
 - Command: `pnpm --filter backend exec jest --runInBand --passWithNoTests`
-- Started: 2026-04-05T08:15:10.257Z
-- Finished: 2026-04-05T08:15:12.893Z
+- Started: 2026-04-05T08:21:15.039Z
+- Finished: 2026-04-05T08:21:17.736Z
 
 ```text
 --------------------------------------------------------------|---------|----------|---------|---------|-----------------------------------------------------------------
 File                                                          | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                               
 --------------------------------------------------------------|---------|----------|---------|---------|-----------------------------------------------------------------
-All files                                                     |    3.35 |    31.39 |   11.17 |    3.35 |                                                                 
+All files                                                     |    3.34 |    31.39 |   11.17 |    3.34 |                                                                 
  src                                                          |       0 |        0 |       0 |       0 |                                                                 
   app.module.ts                                               |       0 |        0 |       0 |       0 | 1-54                                                            
   main.ts                                                     |       0 |        0 |       0 |       0 | 1-129                                                           
@@ -175,12 +175,12 @@ All files                                                     |    3.35 |    31.
   20260404120000-backfill-personal-organizations.ts           |       0 |        0 |       0 |       0 | 1-83                                                            
   20260404130000-create-stripe-webhook-events-table.ts        |       0 |        0 |       0 |       0 | 1-61                                                            
   20260404140000-create-organization-subscriptions-table.ts   |       0 |        0 |       0 |       0 | 1-109                                                           
-  20260405100000-create-emergency-access-grants-table.ts      |       0 |        0 |       0 |       0 | 1-98                                                            
-  20260405120000-create-sso-configurations-table.ts           |       0 |        0 |       0 |       0 | 1-84                                                            
-  20260405121000-create-sso-verified-domains-table.ts         |       0 |        0 |       0 |       0 | 1-75                                                            
-  20260405130000-add-scim-metadata-to-organization-members.ts |       0 |        0 |       0 |       0 | 1-36                                                            
-  20260405131000-create-scim-tokens-table.ts                  |       0 |        0 |       0 |       0 | 1-61                                                            
-  20260405132000-create-scim-provisioning-events-table.ts     |       0 |        0 |       0 |       0 | 1-71                                                            
+  20260405100000-create-emergency-access-grants-table.ts      |       0 |        0 |       0 |       0 | 1-110                                                           
+  20260405120000-create-sso-configurations-table.ts           |       0 |        0 |       0 |       0 | 1-90                                                            
+  20260405121000-create-sso-verified-domains-table.ts         |       0 |        0 |       0 |       0 | 1-82                                                            
+  20260405130000-add-scim-metadata-to-organization-members.ts |       0 |        0 |       0 |       0 | 1-57                                                            
+  20260405131000-create-scim-tokens-table.ts                  |       0 |        0 |       0 |       0 | 1-67                                                            
+  20260405132000-create-scim-provisioning-events-table.ts     |       0 |        0 |       0 |       0 | 1-77                                                            
   20260405143000-create-audit-events-table.ts                 |       0 |        0 |       0 |       0 | 1-91                                                            
  src/database/models                                          |       0 |        0 |       0 |       0 |                                                                 
   audit-event.model.ts                                        |       0 |        0 |       0 |       0 | 1-86                                                            
@@ -233,8 +233,8 @@ All files                                                     |    3.35 |    31.
 - Status: passed
 - Covers: extension
 - Command: `pnpm --filter @repo/extension-core run test`
-- Started: 2026-04-05T08:15:12.893Z
-- Finished: 2026-04-05T08:15:14.121Z
+- Started: 2026-04-05T08:21:17.736Z
+- Finished: 2026-04-05T08:21:19.232Z
 
 ```text
 > @repo/extension-core@0.0.0 test D:\work\password-manager-dev\packages\extension-core
@@ -243,22 +243,49 @@ All files                                                     |    3.35 |    31.
 
 [7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mD:/work/password-manager-dev/packages/extension-core[39m
 
- [32m✓[39m src/cross-browser.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 3[2mms[22m[39m
- [32m✓[39m src/chromium.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 3[2mms[22m[39m
- [32m✓[39m src/trust.test.ts [2m ([22m[2m5 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+ [32m✓[39m src/cross-browser.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 2[2mms[22m[39m
+ [32m✓[39m src/chromium.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 2[2mms[22m[39m
+ [32m✓[39m src/trust.test.ts [2m ([22m[2m5 tests[22m[2m)[22m[90m 2[2mms[22m[39m
 
 [2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
 [2m      Tests [22m [1m[32m12 passed[39m[22m[90m (12)[39m
-[2m   Start at [22m 13:45:13
-[2m   Duration [22m 336ms[2m (transform 116ms, setup 0ms, collect 216ms, tests 9ms, environment 0ms, prepare 301ms)[22m
+[2m   Start at [22m 13:51:18
+[2m   Duration [22m 628ms[2m (transform 389ms, setup 0ms, collect 1.04s, tests 6ms, environment 1ms, prepare 326ms)[22m
+```
+
+### Shared package build
+- Status: passed
+- Covers: auth, vault, billing, tenant boundaries, SSO/SCIM, shared contracts
+- Command: `pnpm --filter @repo/shared build`
+- Started: 2026-04-05T08:21:19.232Z
+- Finished: 2026-04-05T08:21:20.764Z
+
+```text
+> @repo/shared@0.0.0 build D:\work\password-manager-dev\packages\shared
+> tsup src/index.ts --format cjs,esm --dts
+
+[34mCLI[39m Building entry: src/index.ts
+[34mCLI[39m Using tsconfig: tsconfig.json
+[34mCLI[39m tsup v8.5.1
+[34mCLI[39m Target: es2022
+[34mCJS[39m Build start
+[34mESM[39m Build start
+[32mESM[39m [1mdist\index.mjs [22m[32m15.57 KB[39m
+[32mESM[39m ⚡️ Build success in 88ms
+[32mCJS[39m [1mdist\index.js [22m[32m23.05 KB[39m
+[32mCJS[39m ⚡️ Build success in 88ms
+[34mDTS[39m Build start
+[32mDTS[39m ⚡️ Build success in 692ms
+[32mDTS[39m [1mdist\index.d.ts  [22m[32m42.37 KB[39m
+[32mDTS[39m [1mdist\index.d.mts [22m[32m42.37 KB[39m
 ```
 
 ### Backend production build
 - Status: passed
 - Covers: auth, vault, billing, tenant boundaries, SSO/SCIM
 - Command: `pnpm --filter backend build`
-- Started: 2026-04-05T08:15:14.121Z
-- Finished: 2026-04-05T08:15:19.058Z
+- Started: 2026-04-05T08:21:20.764Z
+- Finished: 2026-04-05T08:21:25.866Z
 
 ```text
 > backend@0.0.0 build D:\work\password-manager-dev\apps\backend
@@ -269,8 +296,8 @@ All files                                                     |    3.35 |    31.
 - Status: passed
 - Covers: auth, vault, billing, extension onboarding, admin surfaces
 - Command: `pnpm --filter frontend run check-types`
-- Started: 2026-04-05T08:15:19.058Z
-- Finished: 2026-04-05T08:15:21.851Z
+- Started: 2026-04-05T08:21:25.866Z
+- Finished: 2026-04-05T08:21:28.651Z
 
 ```text
 > frontend@0.1.0 check-types D:\work\password-manager-dev\apps\frontend
@@ -281,8 +308,8 @@ All files                                                     |    3.35 |    31.
 - Status: passed
 - Covers: auth, vault, billing, admin surfaces, import UX
 - Command: `pnpm --filter frontend build`
-- Started: 2026-04-05T08:15:21.851Z
-- Finished: 2026-04-05T08:15:31.247Z
+- Started: 2026-04-05T08:21:28.651Z
+- Finished: 2026-04-05T08:21:37.956Z
 
 ```text
 > frontend@0.1.0 build D:\work\password-manager-dev\apps\frontend
@@ -361,7 +388,7 @@ computing gzip size...
 [2mdist/[22m[36massets/org-settings-BCWglEwF.js            [39m[1m[2m 46.16 kB[22m[1m[22m[2m │ gzip: 13.83 kB[22m
 [2mdist/[22m[36massets/crypto-DDDKealD.js                  [39m[1m[2m225.99 kB[22m[1m[22m[2m │ gzip: 95.10 kB[22m
 [2mdist/[22m[36massets/index-CPmo6oJH.js                   [39m[1m[2m304.85 kB[22m[1m[22m[2m │ gzip: 98.78 kB[22m
-[32m✓ built in 6.15s[39m
+[32m✓ built in 6.01s[39m
 ```
 
 ## Manual Certification Checklist

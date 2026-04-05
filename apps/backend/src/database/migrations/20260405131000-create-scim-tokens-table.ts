@@ -1,7 +1,9 @@
 import { DataTypes, QueryInterface } from 'sequelize';
+import type { MigrationFn } from 'umzug';
 
-export async function up(queryInterface: QueryInterface) {
-  await queryInterface.createTable('scim_tokens', {
+export const up: MigrationFn<QueryInterface> = async ({ context: queryInterface }) => {
+  return queryInterface.sequelize.transaction(async (transaction) => {
+    await queryInterface.createTable('scim_tokens', {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -49,13 +51,17 @@ export async function up(queryInterface: QueryInterface) {
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
-  });
+    }, { transaction });
 
-  await queryInterface.addIndex('scim_tokens', ['organization_id', 'revoked_at'], {
-    name: 'scim_tokens_org_revoked_idx',
+    await queryInterface.addIndex('scim_tokens', ['organization_id', 'revoked_at'], {
+      name: 'scim_tokens_org_revoked_idx',
+      transaction,
+    });
   });
-}
+};
 
-export async function down(queryInterface: QueryInterface) {
-  await queryInterface.dropTable('scim_tokens');
-}
+export const down: MigrationFn<QueryInterface> = async ({ context: queryInterface }) => {
+  return queryInterface.sequelize.transaction(async (transaction) => {
+    await queryInterface.dropTable('scim_tokens', { transaction });
+  });
+};

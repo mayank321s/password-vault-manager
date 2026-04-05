@@ -37,6 +37,9 @@ jobs:
       - name: Crypto package tests
         run: pnpm --filter @repo/crypto-utils exec vitest run --passWithNoTests
 
+      - name: Shared package build
+        run: pnpm --filter @repo/shared build
+
       - name: Backend build
         run: pnpm --filter backend build
 

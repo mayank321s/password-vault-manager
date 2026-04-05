@@ -1,7 +1,9 @@
 import { DataTypes, QueryInterface } from 'sequelize';
+import type { MigrationFn } from 'umzug';
 
-export async function up(queryInterface: QueryInterface) {
-  await queryInterface.createTable('sso_verified_domains', {
+export const up: MigrationFn<QueryInterface> = async ({ context: queryInterface }) => {
+  return queryInterface.sequelize.transaction(async (transaction) => {
+    await queryInterface.createTable('sso_verified_domains', {
     id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -55,21 +57,26 @@ export async function up(queryInterface: QueryInterface) {
       allowNull: false,
       defaultValue: DataTypes.NOW,
     },
-  });
+    }, { transaction });
 
-  await queryInterface.addIndex('sso_verified_domains', ['domain'], {
-    unique: true,
-    name: 'sso_verified_domains_domain_unique_idx',
+    await queryInterface.addIndex('sso_verified_domains', ['domain'], {
+      unique: true,
+      name: 'sso_verified_domains_domain_unique_idx',
+      transaction,
+    });
+    await queryInterface.addIndex(
+      'sso_verified_domains',
+      ['sso_configuration_id', 'organization_id'],
+      {
+        name: 'sso_verified_domains_config_org_idx',
+        transaction,
+      },
+    );
   });
-  await queryInterface.addIndex(
-    'sso_verified_domains',
-    ['sso_configuration_id', 'organization_id'],
-    {
-      name: 'sso_verified_domains_config_org_idx',
-    },
-  );
-}
+};
 
-export async function down(queryInterface: QueryInterface) {
-  await queryInterface.dropTable('sso_verified_domains');
-}
+export const down: MigrationFn<QueryInterface> = async ({ context: queryInterface }) => {
+  return queryInterface.sequelize.transaction(async (transaction) => {
+    await queryInterface.dropTable('sso_verified_domains', { transaction });
+  });
+};

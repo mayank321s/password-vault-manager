@@ -24,6 +24,11 @@ const automatedSuites = [
     covers: ['extension'],
   },
   {
+    name: 'Shared package build',
+    command: 'pnpm --filter @repo/shared build',
+    covers: ['auth', 'vault', 'billing', 'tenant boundaries', 'SSO/SCIM', 'shared contracts'],
+  },
+  {
     name: 'Backend production build',
     command: 'pnpm --filter backend build',
     covers: ['auth', 'vault', 'billing', 'tenant boundaries', 'SSO/SCIM'],
