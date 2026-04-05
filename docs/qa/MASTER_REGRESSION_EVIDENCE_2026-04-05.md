@@ -1,6 +1,6 @@
 # Master Regression Evidence
 
-- Generated at: 2026-04-05T08:12:50.407Z
+- Generated at: 2026-04-05T08:15:10.257Z
 - Repository: `D:\work\password-manager-dev`
 - Overall automated status: passed
 
@@ -10,8 +10,8 @@
 - Status: passed
 - Covers: auth, vault, billing, tenant boundaries, SSO/SCIM
 - Command: `pnpm --filter backend exec jest --runInBand --passWithNoTests`
-- Started: 2026-04-05T08:12:50.407Z
-- Finished: 2026-04-05T08:12:53.111Z
+- Started: 2026-04-05T08:15:10.257Z
+- Finished: 2026-04-05T08:15:12.893Z
 
 ```text
 --------------------------------------------------------------|---------|----------|---------|---------|-----------------------------------------------------------------
@@ -233,8 +233,8 @@ All files                                                     |    3.35 |    31.
 - Status: passed
 - Covers: extension
 - Command: `pnpm --filter @repo/extension-core run test`
-- Started: 2026-04-05T08:12:53.111Z
-- Finished: 2026-04-05T08:12:54.340Z
+- Started: 2026-04-05T08:15:12.893Z
+- Finished: 2026-04-05T08:15:14.121Z
 
 ```text
 > @repo/extension-core@0.0.0 test D:\work\password-manager-dev\packages\extension-core
@@ -244,21 +244,21 @@ All files                                                     |    3.35 |    31.
 [7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mD:/work/password-manager-dev/packages/extension-core[39m
 
  [32m✓[39m src/cross-browser.test.ts [2m ([22m[2m3 tests[22m[2m)[22m[90m 3[2mms[22m[39m
- [32m✓[39m src/trust.test.ts [2m ([22m[2m5 tests[22m[2m)[22m[90m 3[2mms[22m[39m
  [32m✓[39m src/chromium.test.ts [2m ([22m[2m4 tests[22m[2m)[22m[90m 3[2mms[22m[39m
+ [32m✓[39m src/trust.test.ts [2m ([22m[2m5 tests[22m[2m)[22m[90m 3[2mms[22m[39m
 
 [2m Test Files [22m [1m[32m3 passed[39m[22m[90m (3)[39m
 [2m      Tests [22m [1m[32m12 passed[39m[22m[90m (12)[39m
-[2m   Start at [22m 13:42:53
-[2m   Duration [22m 342ms[2m (transform 129ms, setup 0ms, collect 225ms, tests 9ms, environment 0ms, prepare 303ms)[22m
+[2m   Start at [22m 13:45:13
+[2m   Duration [22m 336ms[2m (transform 116ms, setup 0ms, collect 216ms, tests 9ms, environment 0ms, prepare 301ms)[22m
 ```
 
 ### Backend production build
 - Status: passed
 - Covers: auth, vault, billing, tenant boundaries, SSO/SCIM
 - Command: `pnpm --filter backend build`
-- Started: 2026-04-05T08:12:54.340Z
-- Finished: 2026-04-05T08:12:59.388Z
+- Started: 2026-04-05T08:15:14.121Z
+- Finished: 2026-04-05T08:15:19.058Z
 
 ```text
 > backend@0.0.0 build D:\work\password-manager-dev\apps\backend
@@ -269,8 +269,8 @@ All files                                                     |    3.35 |    31.
 - Status: passed
 - Covers: auth, vault, billing, extension onboarding, admin surfaces
 - Command: `pnpm --filter frontend run check-types`
-- Started: 2026-04-05T08:12:59.388Z
-- Finished: 2026-04-05T08:13:02.260Z
+- Started: 2026-04-05T08:15:19.058Z
+- Finished: 2026-04-05T08:15:21.851Z
 
 ```text
 > frontend@0.1.0 check-types D:\work\password-manager-dev\apps\frontend
@@ -281,8 +281,8 @@ All files                                                     |    3.35 |    31.
 - Status: passed
 - Covers: auth, vault, billing, admin surfaces, import UX
 - Command: `pnpm --filter frontend build`
-- Started: 2026-04-05T08:13:02.260Z
-- Finished: 2026-04-05T08:13:11.795Z
+- Started: 2026-04-05T08:15:21.851Z
+- Finished: 2026-04-05T08:15:31.247Z
 
 ```text
 > frontend@0.1.0 build D:\work\password-manager-dev\apps\frontend
@@ -361,7 +361,7 @@ computing gzip size...
 [2mdist/[22m[36massets/org-settings-BCWglEwF.js            [39m[1m[2m 46.16 kB[22m[1m[22m[2m │ gzip: 13.83 kB[22m
 [2mdist/[22m[36massets/crypto-DDDKealD.js                  [39m[1m[2m225.99 kB[22m[1m[22m[2m │ gzip: 95.10 kB[22m
 [2mdist/[22m[36massets/index-CPmo6oJH.js                   [39m[1m[2m304.85 kB[22m[1m[22m[2m │ gzip: 98.78 kB[22m
-[32m✓ built in 6.22s[39m
+[32m✓ built in 6.15s[39m
 ```
 
 ## Manual Certification Checklist

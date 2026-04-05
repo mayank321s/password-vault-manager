@@ -47,6 +47,25 @@ const manualSuites = [
   'Billing/SSO/SCIM admin-path sanity review using the current launch-ready UI and API contracts.',
 ];
 
+function extractSection(content, heading, fallbackLines) {
+  const marker = `## ${heading}`;
+  const startIndex = content.indexOf(marker);
+  if (startIndex === -1) {
+    return fallbackLines;
+  }
+
+  const nextHeadingIndex = content.indexOf('\n## ', startIndex + marker.length);
+  const sectionBody = content
+    .slice(startIndex + marker.length, nextHeadingIndex === -1 ? undefined : nextHeadingIndex)
+    .trim();
+
+  if (!sectionBody) {
+    return fallbackLines;
+  }
+
+  return sectionBody.split('\n');
+}
+
 function runSuite(suite) {
   const startedAt = new Date().toISOString();
   try {
@@ -79,6 +98,18 @@ function runSuite(suite) {
 
 const results = automatedSuites.map(runSuite);
 const hasFailures = results.some((result) => result.status !== 'passed');
+const existingReport = fs.existsSync(reportPath)
+  ? fs.readFileSync(reportPath, 'utf8')
+  : '';
+const preservedManualChecklist = extractSection(
+  existingReport,
+  'Manual Certification Checklist',
+  manualSuites.map((item) => `- [ ] ${item}`),
+);
+const preservedNotes = extractSection(existingReport, 'Notes', [
+  '- This report is generated from executable repository checks plus a launch certification checklist for manual sign-off.',
+  '- Manual items must be marked complete by the release owner before go-live.',
+]);
 
 const lines = [
   '# Master Regression Evidence',
@@ -112,15 +143,16 @@ for (const result of results) {
 lines.push('');
 lines.push('## Manual Certification Checklist');
 lines.push('');
-for (const item of manualSuites) {
-  lines.push(`- [ ] ${item}`);
+for (const line of preservedManualChecklist) {
+  lines.push(line);
 }
 
 lines.push('');
 lines.push('## Notes');
 lines.push('');
-lines.push('- This report is generated from executable repository checks plus a launch certification checklist for manual sign-off.');
-lines.push('- Manual items must be marked complete by the release owner before go-live.');
+for (const line of preservedNotes) {
+  lines.push(line);
+}
 
 fs.mkdirSync(path.dirname(reportPath), { recursive: true });
 fs.writeFileSync(reportPath, `${lines.join('\n')}\n`);
