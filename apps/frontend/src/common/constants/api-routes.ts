@@ -75,6 +75,10 @@ export const API_V1_ROUTES = {
   policy: {
     current: `${API_V1_PREFIX}/policies/current`,
   },
+  audit: {
+    events: `${API_V1_PREFIX}/audit/events`,
+    export: `${API_V1_PREFIX}/audit/export`,
+  },
   family: {
     createWorkspace: `${API_V1_PREFIX}/family/workspaces`,
     inviteMember: (organizationId: string) =>
