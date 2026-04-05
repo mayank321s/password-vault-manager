@@ -1,45 +1,109 @@
 import { Injectable } from '@nestjs/common';
 import type {
+  ImportDuplicateGroup,
   ImportedVaultRecord,
   ImportField,
+  ImportIssue,
   ParseImportRequest,
   ParseImportResponse,
 } from '@repo/shared';
 
 type CsvRow = Record<string, string>;
+type RowParseResult = {
+  rowNumber: number;
+  row: CsvRow;
+  issues: ImportIssue[];
+};
+type RecordBuildResult = {
+  record: ImportedVaultRecord;
+  issues: ImportIssue[];
+};
 
 @Injectable()
 export class ImportsService {
   parseImport(_userId: string, payload: ParseImportRequest): ParseImportResponse {
     const rows = parseCsvRows(payload.content);
-    const records = rows
-      .map((row) => this.parseRow(payload.provider, row))
-      .filter((record): record is ImportedVaultRecord => record !== null);
+    const issues: ImportIssue[] = [];
+    const recordResults = rows
+      .map((row) => {
+        issues.push(...row.issues);
+        if (row.issues.some((issue) => issue.severity === 'error')) {
+          return null;
+        }
+        return this.parseRow(payload.provider, row);
+      })
+      .filter((record): record is RecordBuildResult => record !== null);
+
+    const records = recordResults.map((result) => result.record);
+    issues.push(...recordResults.flatMap((result) => result.issues));
+
+    const duplicateGroups = findDuplicateGroups(records);
+    if (duplicateGroups.length > 0) {
+      issues.push(...buildDuplicateIssues(duplicateGroups));
+    }
+
+    const duplicateRows = new Set(
+      duplicateGroups.flatMap((group) => group.rowNumbers),
+    );
+    const recordsWithReviewState = records.map((record) => {
+      const rowHasIssue = issues.some(
+        (issue) => issue.rowNumber === record.rowNumber,
+      );
+
+      return {
+        ...record,
+        reviewRequired: rowHasIssue || duplicateRows.has(record.rowNumber),
+        warnings: issues
+          .filter(
+            (issue) =>
+              issue.rowNumber === record.rowNumber &&
+              issue.severity === 'warning',
+          )
+          .map((issue) => issue.message),
+      };
+    });
+
+    const errorCount = issues.filter((issue) => issue.severity === 'error').length;
+    const requiresReviewCount = recordsWithReviewState.filter(
+      (record) => record.reviewRequired,
+    ).length;
 
     return {
       provider: payload.provider,
       totalRows: rows.length,
       parsedCount: records.length,
       skippedCount: rows.length - records.length,
-      records,
+      records: recordsWithReviewState,
+      issues,
+      duplicateGroups,
+      summary: {
+        totalRows: rows.length,
+        parsedCount: records.length,
+        skippedCount: rows.length - records.length,
+        requiresReviewCount,
+        duplicateGroupCount: duplicateGroups.length,
+        issueCount: issues.length,
+        errorCount,
+      },
     };
   }
 
   private parseRow(
     provider: ParseImportRequest['provider'],
-    row: CsvRow,
-  ): ImportedVaultRecord | null {
+    input: RowParseResult,
+  ): RecordBuildResult | null {
     switch (provider) {
       case 'generic_csv':
-        return this.parseGenericCsvRow(row);
+        return this.parseGenericCsvRow(input);
       case 'lastpass_csv':
-        return this.parseLastPassRow(row);
+        return this.parseLastPassRow(input);
       case 'onepassword_csv':
-        return this.parseOnePasswordRow(row);
+        return this.parseOnePasswordRow(input);
     }
   }
 
-  private parseGenericCsvRow(row: CsvRow): ImportedVaultRecord | null {
+  private parseGenericCsvRow(input: RowParseResult): RecordBuildResult | null {
+    const { row } = input;
     const title = firstValue(row, ['title', 'name', 'site', 'label']);
     const username = firstValue(row, ['username', 'user', 'email', 'login']);
     const password = firstValue(row, ['password', 'passcode', 'secret']);
@@ -53,6 +117,7 @@ export class ImportsService {
     }
 
     return buildImportedRecord({
+      rowNumber: input.rowNumber,
       provider: 'generic_csv',
       title: title || url || username || 'Imported record',
       folder: folder || null,
@@ -64,7 +129,8 @@ export class ImportsService {
     });
   }
 
-  private parseLastPassRow(row: CsvRow): ImportedVaultRecord | null {
+  private parseLastPassRow(input: RowParseResult): RecordBuildResult | null {
+    const { row } = input;
     const title = firstValue(row, ['name']);
     const username = firstValue(row, ['username']);
     const password = firstValue(row, ['password']);
@@ -78,6 +144,7 @@ export class ImportsService {
     }
 
     return buildImportedRecord({
+      rowNumber: input.rowNumber,
       provider: 'lastpass_csv',
       title: title || url || username || 'Imported LastPass record',
       folder: folder || null,
@@ -90,7 +157,8 @@ export class ImportsService {
     });
   }
 
-  private parseOnePasswordRow(row: CsvRow): ImportedVaultRecord | null {
+  private parseOnePasswordRow(input: RowParseResult): RecordBuildResult | null {
+    const { row } = input;
     const title = firstValue(row, ['title']);
     const username = firstValue(row, ['username']);
     const password = firstValue(row, ['password']);
@@ -105,15 +173,8 @@ export class ImportsService {
       return null;
     }
 
-    const warnings: string[] = [];
-    if (normalizeBoolean(archived)) {
-      warnings.push('Archived item imported for review.');
-    }
-    if (normalizeBoolean(favorite)) {
-      warnings.push('Favorite flag preserved as metadata only.');
-    }
-
-    const record = buildImportedRecord({
+    const result = buildImportedRecord({
+      rowNumber: input.rowNumber,
       provider: 'onepassword_csv',
       title: title || url || username || 'Imported 1Password record',
       folder: null,
@@ -125,14 +186,35 @@ export class ImportsService {
       totp: otp,
     });
 
-    return {
-      ...record,
-      warnings: [...record.warnings, ...warnings],
-    };
+    if (normalizeBoolean(archived)) {
+      result.issues.push({
+        rowNumber: input.rowNumber,
+        severity: 'warning',
+        code: 'archived_item',
+        message: 'Archived item imported for review.',
+        field: 'Archived',
+        suggestedAction:
+          'Confirm the archived item should be restored before final import.',
+      });
+    }
+    if (normalizeBoolean(favorite)) {
+      result.issues.push({
+        rowNumber: input.rowNumber,
+        severity: 'warning',
+        code: 'favorite_metadata_only',
+        message: 'Favorite flag preserved as metadata only.',
+        field: 'Favorite',
+        suggestedAction:
+          'Reapply favorite status manually after import if it still matters.',
+      });
+    }
+
+    return result;
   }
 }
 
 function buildImportedRecord(input: {
+  rowNumber: number;
   provider: ParseImportRequest['provider'];
   title: string;
   folder: string | null;
@@ -142,9 +224,9 @@ function buildImportedRecord(input: {
   password?: string;
   notes?: string;
   totp?: string;
-}): ImportedVaultRecord {
+}): RecordBuildResult {
   const urls = input.url ? [input.url] : [];
-  const warnings: string[] = [];
+  const issues: ImportIssue[] = [];
 
   const fields: ImportField[] = [];
   if (input.username) fields.push({ label: 'Username', value: input.username });
@@ -155,25 +237,38 @@ function buildImportedRecord(input: {
 
   const isNote = !input.password && Boolean(input.notes) && !input.username;
   if (!input.password) {
-    warnings.push('No password value found; review before import.');
+    issues.push({
+      rowNumber: input.rowNumber,
+      severity: 'warning',
+      code: 'missing_password',
+      message: 'No password value found; review before import.',
+      field: 'password',
+      suggestedAction:
+        'Confirm this row is intended to be imported as a secure note or add the missing password value.',
+    });
   }
 
   return {
-    provider: input.provider,
-    title: input.title,
-    folder: input.folder,
-    tags: input.tags,
-    urls,
-    warnings,
-    content: isNote
-      ? {
-          type: 'note',
-          content: input.notes ?? '',
-        }
-      : {
-          type: 'password',
-          fields,
-        },
+    record: {
+      rowNumber: input.rowNumber,
+      provider: input.provider,
+      title: input.title,
+      folder: input.folder,
+      tags: input.tags,
+      urls,
+      warnings: [],
+      reviewRequired: issues.length > 0,
+      content: isNote
+        ? {
+            type: 'note',
+            content: input.notes ?? '',
+          }
+        : {
+            type: 'password',
+            fields,
+          },
+    },
+    issues,
   };
 }
 
@@ -212,19 +307,44 @@ function normalizeBoolean(value: string | undefined): boolean {
   return ['1', 'true', 'yes'].includes(value?.trim().toLowerCase() ?? '');
 }
 
-function parseCsvRows(content: string): CsvRow[] {
+function parseCsvRows(content: string): RowParseResult[] {
   const lines = splitCsvLines(content).filter((line) => line.trim().length > 0);
   if (lines.length === 0) {
     return [];
   }
 
-  const headers = parseCsvLine(lines[0]!).map((header) => header.trim());
-  return lines.slice(1).map((line) => {
-    const values = parseCsvLine(line);
-    return headers.reduce<CsvRow>((record, header, index) => {
-      record[header] = values[index] ?? '';
+  const headerParse = parseCsvLine(lines[0]!);
+  if (headerParse.hasUnbalancedQuotes) {
+    return [];
+  }
+
+  const headers = headerParse.values.map((header) => header.trim());
+  return lines.slice(1).map((line, index) => {
+    const rowNumber = index + 2;
+    const valuesParse = parseCsvLine(line);
+    const issues: ImportIssue[] = [];
+
+    if (
+      valuesParse.hasUnbalancedQuotes ||
+      valuesParse.values.length > headers.length
+    ) {
+      issues.push({
+        rowNumber,
+        severity: 'error',
+        code: 'malformed_row',
+        message: 'Row could not be parsed safely from the CSV source.',
+        field: null,
+        suggestedAction:
+          'Fix unmatched quotes or extra columns in the source file, then retry the import.',
+      });
+    }
+
+    const row = headers.reduce<CsvRow>((record, header, valueIndex) => {
+      record[header] = valuesParse.values[valueIndex] ?? '';
       return record;
     }, {});
+
+    return { rowNumber, row, issues };
   });
 }
 
@@ -243,6 +363,8 @@ function splitCsvLines(content: string): string[] {
         index += 1;
         continue;
       }
+
+      current += char;
       inQuotes = !inQuotes;
       continue;
     }
@@ -266,7 +388,9 @@ function splitCsvLines(content: string): string[] {
   return lines;
 }
 
-function parseCsvLine(line: string): string[] {
+function parseCsvLine(
+  line: string,
+): { values: string[]; hasUnbalancedQuotes: boolean } {
   const values: string[] = [];
   let current = '';
   let inQuotes = false;
@@ -296,5 +420,56 @@ function parseCsvLine(line: string): string[] {
   }
 
   values.push(current);
-  return values;
+  return { values, hasUnbalancedQuotes: inQuotes };
+}
+
+function findDuplicateGroups(
+  records: ImportedVaultRecord[],
+): ImportDuplicateGroup[] {
+  const grouped = new Map<string, number[]>();
+
+  for (const record of records) {
+    const signature = buildRecordSignature(record);
+    const existing = grouped.get(signature) ?? [];
+    existing.push(record.rowNumber);
+    grouped.set(signature, existing);
+  }
+
+  return [...grouped.entries()]
+    .filter(([, rowNumbers]) => rowNumbers.length > 1)
+    .map(([signature, rowNumbers]) => ({
+      signature,
+      rowNumbers,
+      suggestedAction:
+        'Review these rows and keep only the best source entry before final import.',
+    }));
+}
+
+function buildDuplicateIssues(
+  groups: ImportDuplicateGroup[],
+): ImportIssue[] {
+  return groups.flatMap((group) =>
+    group.rowNumbers.map((rowNumber) => ({
+      rowNumber,
+      severity: 'warning' as const,
+      code: 'duplicate_record' as const,
+      message: `Possible duplicate detected with rows ${group.rowNumbers.join(', ')}.`,
+      field: null,
+      suggestedAction: group.suggestedAction,
+    })),
+  );
+}
+
+function buildRecordSignature(record: ImportedVaultRecord): string {
+  const usernameField =
+    record.content.type === 'password'
+      ? record.content.fields.find((field) => field.label === 'Username')?.value
+      : undefined;
+
+  return [
+    record.content.type,
+    record.title.trim().toLowerCase(),
+    (record.urls[0] ?? '').trim().toLowerCase(),
+    (usernameField ?? '').trim().toLowerCase(),
+  ].join('|');
 }
