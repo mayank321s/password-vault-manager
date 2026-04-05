@@ -45,7 +45,7 @@ export default function PricingPage() {
         description:
           'Team-grade governance, collaboration controls, and billing admin for organizations.',
         highlights: [
-          'Up to 100 managed seats in self-serve mode',
+          'Up to 250 managed seats in self-serve mode',
           'Seat utilization, central billing, and role-based admin',
           'Business collaboration with external share controls',
         ],
