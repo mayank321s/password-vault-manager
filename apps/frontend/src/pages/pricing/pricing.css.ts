@@ -83,6 +83,28 @@ export const cardDescription = style({
   lineHeight: 1.45,
 });
 
+export const featureBlock = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '0.35rem',
+});
+
+export const featureLabel = style({
+  margin: 0,
+  color: '#f8fafc',
+  fontSize: '0.85rem',
+  fontWeight: 700,
+  textTransform: 'uppercase',
+  letterSpacing: '0.04em',
+});
+
+export const featureList = style({
+  margin: 0,
+  paddingLeft: '1.1rem',
+  color: '#cbd5e1',
+  lineHeight: 1.5,
+});
+
 export const priceId = style({
   margin: 0,
   color: '#cbd5e1',

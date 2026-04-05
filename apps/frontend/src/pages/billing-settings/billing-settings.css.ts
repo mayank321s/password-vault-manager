@@ -106,3 +106,9 @@ export const errorText = style({
   color: '#fecaca',
 });
 
+export const warningText = style({
+  margin: 0,
+  color: '#fcd34d',
+  lineHeight: 1.5,
+});
+

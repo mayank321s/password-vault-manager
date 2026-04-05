@@ -79,7 +79,7 @@ export class EntitlementGuard implements CanActivate {
       };
     }
 
-    const maxSeats = subscription.planType === 'family' ? 6 : 100;
+    const maxSeats = subscription.planType === 'family' ? 6 : 250;
     return {
       features: {
         externalShares:

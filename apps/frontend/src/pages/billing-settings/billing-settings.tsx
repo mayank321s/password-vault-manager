@@ -14,11 +14,24 @@ function formatCurrency(amount: number, currency: string): string {
   }).format(amount / 100);
 }
 
+function getSeatMessage() {
+  return {
+    healthy: null,
+    warning:
+      'Seat usage is approaching the current plan threshold. Review member count before the next invite.',
+    full: 'No seats are available on the current plan. Increase capacity before adding more members.',
+  } as const;
+}
+
 export default function BillingSettingsPage() {
   const subscriptionQuery = useSubscriptionState();
   const entitlementsQuery = useEntitlements();
   const invoicesQuery = useInvoices();
   const portalMutation = useCreateBillingPortalSession();
+  const seatWarning =
+    entitlementsQuery.isSuccess
+      ? getSeatMessage()[entitlementsQuery.data.seatPolicy.warningState]
+      : null;
 
   const openPortal = async () => {
     const session = await portalMutation.mutateAsync();
@@ -104,9 +117,56 @@ export default function BillingSettingsPage() {
                 <p className={styles.cardText}>
                   Available seats: {entitlementsQuery.data.seats.available}
                 </p>
+                <p className={styles.cardText}>
+                  Seat policy: hard limit {entitlementsQuery.data.seatPolicy.hardLimit}
+                  {entitlementsQuery.data.seatPolicy.softWarningThreshold
+                    ? `, soft warning at ${entitlementsQuery.data.seatPolicy.softWarningThreshold}`
+                    : ''}
+                </p>
+                {seatWarning && <p className={styles.warningText}>{seatWarning}</p>}
               </>
             ) : (
               <p className={styles.cardText}>Seat metrics unavailable.</p>
+            )}
+          </section>
+
+          <section className={styles.card}>
+            <h2 className={styles.cardTitle}>Package Capabilities</h2>
+            {entitlementsQuery.isSuccess ? (
+              <>
+                <p className={styles.cardText}>
+                  External shares:{' '}
+                  {entitlementsQuery.data.features.externalShares
+                    ? 'Included'
+                    : 'Locked for current plan state'}
+                </p>
+                <p className={styles.cardText}>
+                  SSO Pack:{' '}
+                  {entitlementsQuery.data.addOns.ssoPackAvailable
+                    ? 'Available as enterprise add-on'
+                    : 'Not available on family plan'}
+                </p>
+                <p className={styles.cardText}>
+                  SCIM Pack:{' '}
+                  {entitlementsQuery.data.addOns.scimPackAvailable
+                    ? 'Available as enterprise add-on'
+                    : 'Not available on family plan'}
+                </p>
+                <p className={styles.cardText}>
+                  Audit & Export Pack:{' '}
+                  {entitlementsQuery.data.addOns.auditExportPackAvailable
+                    ? 'Available as enterprise add-on'
+                    : 'Not available on family plan'}
+                </p>
+                <p className={styles.cardText}>
+                  SIEM Connector Pack:{' '}
+                  {entitlementsQuery.data.addOns.siemConnectorPackAvailable
+                    ? 'Post-launch enterprise add-on'
+                    : 'Not available on family plan'}
+                </p>
+              </>
+            ) : (
+              <p className={styles.cardText}>Capability summary unavailable.</p>
             )}
           </section>
         </div>
