@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { createHash, randomBytes } from 'crypto';
 import { CurrentUserData } from 'src/common/decorators';
+import { AuditService } from 'src/common/services/audit.service';
 import {
   OrganizationMemberRole,
   OrganizationMemberStatus,
@@ -31,6 +32,7 @@ export class ScimAdminService {
     private readonly organizationMemberRepository: OrganizationMemberRepository,
     private readonly scimTokenRepository: ScimTokenRepository,
     private readonly scimProvisioningEventRepository: ScimProvisioningEventRepository,
+    private readonly auditService: AuditService,
   ) {}
 
   async listTokens(currentUser: CurrentUserData): Promise<ScimTokenResponseDto[]> {
@@ -60,10 +62,22 @@ export class ScimAdminService {
       undefined as never,
     );
 
-    return {
+    const response = {
       ...this.toTokenResponse(token),
       plainTextToken: rawToken,
     };
+
+    await this.auditService.recordFromUser(currentUser, {
+      action: 'scim.token.created',
+      targetType: 'scim_token',
+      targetId: token.id,
+      targetLabel: token.label,
+      metadata: {
+        tokenPrefix: token.tokenPrefix,
+      },
+    });
+
+    return response;
   }
 
   async revokeToken(currentUser: CurrentUserData, tokenId: string) {
@@ -74,7 +88,19 @@ export class ScimAdminService {
     }
 
     await token.update({ revokedAt: token.revokedAt ?? new Date() });
-    return this.toTokenResponse(token);
+    const response = this.toTokenResponse(token);
+
+    await this.auditService.recordFromUser(currentUser, {
+      action: 'scim.token.revoked',
+      targetType: 'scim_token',
+      targetId: token.id,
+      targetLabel: token.label,
+      metadata: {
+        tokenPrefix: token.tokenPrefix,
+      },
+    });
+
+    return response;
   }
 
   async getDiagnostics(currentUser: CurrentUserData): Promise<ScimDiagnosticsDto> {

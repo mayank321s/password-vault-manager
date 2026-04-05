@@ -7,6 +7,7 @@ import {
 import { Sequelize } from 'sequelize-typescript';
 import { randomBytes } from 'crypto';
 import { CurrentUserData } from 'src/common/decorators';
+import { AuditService } from 'src/common/services/audit.service';
 import {
   OrganizationMemberRole,
   OrganizationMemberStatus,
@@ -33,6 +34,7 @@ export class SsoService {
     private readonly organizationMemberRepository: OrganizationMemberRepository,
     private readonly ssoConfigurationRepository: SsoConfigurationRepository,
     private readonly ssoVerifiedDomainRepository: SsoVerifiedDomainRepository,
+    private readonly auditService: AuditService,
   ) {}
 
   async getCurrentConfiguration(
@@ -154,7 +156,24 @@ export class SsoService {
     if (!reloaded) {
       throw new NotFoundException('SSO configuration could not be reloaded');
     }
-    return this.toResponse(reloaded);
+    const response = this.toResponse(reloaded);
+
+    await this.auditService.recordFromUser(user, {
+      action: 'sso.configuration.updated',
+      targetType: 'sso_configuration',
+      targetId: response.configId,
+      targetLabel:
+        response.domains.find((domain) => domain.isPrimary)?.domain ??
+        response.tenantId,
+      metadata: {
+        provider: response.provider,
+        domains: response.domains.map((domain) => domain.domain),
+        primaryDomain:
+          response.domains.find((domain) => domain.isPrimary)?.domain ?? null,
+      },
+    });
+
+    return response;
   }
 
   async verifyDomain(
@@ -189,7 +208,19 @@ export class SsoService {
     if (!updated) {
       throw new NotFoundException('SSO configuration not found');
     }
-    return this.toResponse(updated);
+    const response = this.toResponse(updated);
+
+    await this.auditService.recordFromUser(user, {
+      action: 'sso.domain.verified',
+      targetType: 'sso_domain',
+      targetId: domain.id,
+      targetLabel: domain.domain,
+      metadata: {
+        organizationId,
+      },
+    });
+
+    return response;
   }
 
   private async requireBusinessOrganizationAdmin(user: CurrentUserData) {
