@@ -12,6 +12,10 @@ function formatTimestamp(value: string) {
   return new Date(value).toLocaleString();
 }
 
+function toIsoDateTime(value: string) {
+  return value ? new Date(value).toISOString() : undefined;
+}
+
 function downloadExport(fileName: string, contentType: string, content: string) {
   const blob = new Blob([content], { type: contentType });
   const url = URL.createObjectURL(blob);
@@ -44,8 +48,8 @@ export function AuditSettingsPanel({
       action: action.trim() || undefined,
       targetType: targetType.trim() || undefined,
       targetId: targetId.trim() || undefined,
-      dateFrom: dateFrom || undefined,
-      dateTo: dateTo || undefined,
+      dateFrom: toIsoDateTime(dateFrom),
+      dateTo: toIsoDateTime(dateTo),
       limit: 100,
     }),
     [actorUserId, action, targetType, targetId, dateFrom, dateTo],
