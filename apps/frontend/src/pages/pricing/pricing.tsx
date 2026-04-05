@@ -24,6 +24,16 @@ export default function PricingPage() {
         title: 'Family Plan',
         description:
           'Shared vaults, secure family collaboration, and recovery controls for household members.',
+        highlights: [
+          'Up to 6 members with owner, adult, and child roles',
+          'Emergency access and shared family vaults',
+          'Soft warning at 5 of 6 seats used',
+        ],
+        exclusions: [
+          'No SSO or SCIM provisioning',
+          'No enterprise audit export integrations',
+          'No advanced admin policy engine',
+        ],
         priceId:
           interval === 'monthly'
             ? catalogQuery.data.family.monthlyPriceId
@@ -34,6 +44,21 @@ export default function PricingPage() {
         title: 'Business Plan',
         description:
           'Team-grade governance, collaboration controls, and billing admin for organizations.',
+        highlights: [
+          'Up to 100 managed seats in self-serve mode',
+          'Seat utilization, central billing, and role-based admin',
+          'Business collaboration with external share controls',
+        ],
+        exclusions: [
+          'SSO and SCIM require enterprise add-ons',
+          'SIEM connector is post-launch',
+        ],
+        addOns: [
+          'SSO Pack',
+          'SCIM Pack',
+          'Audit & Export Pack',
+          'SIEM Connector Pack (post-launch)',
+        ],
         priceId:
           interval === 'monthly'
             ? catalogQuery.data.business.monthlyPriceId
@@ -84,6 +109,32 @@ export default function PricingPage() {
             <article key={card.plan} className={styles.card}>
               <h2 className={styles.cardTitle}>{card.title}</h2>
               <p className={styles.cardDescription}>{card.description}</p>
+              <div className={styles.featureBlock}>
+                <p className={styles.featureLabel}>Included</p>
+                <ul className={styles.featureList}>
+                  {card.highlights.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className={styles.featureBlock}>
+                <p className={styles.featureLabel}>Not included</p>
+                <ul className={styles.featureList}>
+                  {card.exclusions.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </div>
+              {'addOns' in card && card.addOns ? (
+                <div className={styles.featureBlock}>
+                  <p className={styles.featureLabel}>Enterprise add-ons</p>
+                  <ul className={styles.featureList}>
+                    {card.addOns.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null}
               <p className={styles.priceId}>Price ID: {card.priceId}</p>
               <button
                 type="button"

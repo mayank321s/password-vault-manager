@@ -48,8 +48,19 @@ export type EntitlementSummary = {
     max: number;
     available: number;
   };
+  seatPolicy: {
+    softWarningThreshold: number | null;
+    hardLimit: number;
+    warningState: 'healthy' | 'warning' | 'full';
+  };
   features: {
     externalShares: boolean;
+  };
+  addOns: {
+    ssoPackAvailable: boolean;
+    scimPackAvailable: boolean;
+    auditExportPackAvailable: boolean;
+    siemConnectorPackAvailable: boolean;
   };
 };
 

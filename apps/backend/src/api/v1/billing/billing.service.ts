@@ -152,6 +152,14 @@ export class BillingService {
     );
     const maxSeats = subscription.planType === SubscriptionPlanType.FAMILY ? 6 : 100;
     const availableSeats = Math.max(maxSeats - seatsUsed, 0);
+    const softWarningThreshold =
+      subscription.planType === SubscriptionPlanType.FAMILY ? 5 : null;
+    const warningState =
+      availableSeats === 0
+        ? 'full'
+        : softWarningThreshold !== null && seatsUsed >= softWarningThreshold
+          ? 'warning'
+          : 'healthy';
 
     const isPlanUsable =
       subscription.lifecycleStatus !== SubscriptionLifecycleStatus.FAILURE &&
@@ -165,9 +173,24 @@ export class BillingService {
         max: maxSeats,
         available: availableSeats,
       },
+      seatPolicy: {
+        softWarningThreshold,
+        hardLimit: maxSeats,
+        warningState,
+      },
       features: {
         externalShares:
           isPlanUsable && subscription.planType === SubscriptionPlanType.BUSINESS,
+      },
+      addOns: {
+        ssoPackAvailable:
+          subscription.planType === SubscriptionPlanType.BUSINESS,
+        scimPackAvailable:
+          subscription.planType === SubscriptionPlanType.BUSINESS,
+        auditExportPackAvailable:
+          subscription.planType === SubscriptionPlanType.BUSINESS,
+        siemConnectorPackAvailable:
+          subscription.planType === SubscriptionPlanType.BUSINESS,
       },
     };
   }
