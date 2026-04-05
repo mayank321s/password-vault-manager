@@ -138,6 +138,15 @@ npx turbo link
 
 This example take some inspiration the [with-nextjs](https://github.com/vercel/turborepo/tree/main/examples/with-nextjs) `Turbo` example and [01-cats-app](https://github.com/nestjs/nest/tree/master/sample/01-cats-app) `NestJs` sample.
 
+## Trust And Compliance Docs
+
+- `docs/devops/SOC2_CONTROL_CHECKLIST.md`
+- `docs/devops/SECURITY_REDACTION_POLICY.md`
+- `docs/devops/SECURITY_DISCLOSURE_WORKFLOW.md`
+- `docs/devops/THREAT_MODEL.md`
+- `docs/devops/SECURITY_ALERT_BASELINES.md`
+- `docs/devops/SECURITY_INCIDENT_RUNBOOKS.md`
+
 Learn more about the power of Turborepo:
 
 - [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
