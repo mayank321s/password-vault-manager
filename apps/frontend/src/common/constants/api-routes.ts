@@ -107,4 +107,7 @@ export const API_V1_ROUTES = {
       `${API_V1_PREFIX}/scim/admin/tokens/${tokenId}/revoke`,
     adminDiagnostics: `${API_V1_PREFIX}/scim/admin/diagnostics`,
   },
+  imports: {
+    parse: `${API_V1_PREFIX}/imports/parse`,
+  },
 };

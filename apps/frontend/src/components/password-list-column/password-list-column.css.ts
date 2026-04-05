@@ -24,6 +24,12 @@ export const vaultNameRow = style({
   marginBottom: '0.75rem',
 });
 
+export const headerActions = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.5rem',
+});
+
 export const addPasswordButton = style({
   flexShrink: 0,
   width: '26px',
@@ -47,6 +53,16 @@ export const addPasswordButton = style({
       backgroundColor: 'rgba(102,126,234,0.08)',
     },
   },
+});
+
+export const importLink = style({
+  borderRadius: '999px',
+  border: '1px solid rgba(125, 211, 252, 0.35)',
+  color: '#7dd3fc',
+  textDecoration: 'none',
+  fontSize: '0.75rem',
+  fontWeight: 800,
+  padding: '0.3rem 0.7rem',
 });
 
 export const passwordListVaultName = style({
@@ -241,4 +257,12 @@ export const passwordListEmptyIcon = style({
 export const passwordListEmptyText = style({
   fontSize: '0.875rem',
   lineHeight: 1.5,
+});
+
+export const emptyImportLink = style({
+  marginTop: '0.85rem',
+  color: '#7dd3fc',
+  textDecoration: 'none',
+  fontSize: '0.82rem',
+  fontWeight: 700,
 });
