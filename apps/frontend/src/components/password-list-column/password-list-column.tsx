@@ -1,7 +1,12 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { PasswordListColumnProps } from './password-list-column.type';
 import * as styles from './password-list-column.css';
 import * as panelStyles from '../../common/css/panel.css';
 import { PiNoteFill, PiPasswordFill } from 'react-icons/pi';
+
+const EXTENSION_ONBOARDING_COMPLETE_KEY = 'extension_onboarding_complete';
+const EXTENSION_ONBOARDING_DISMISSED_KEY = 'extension_onboarding_prompt_dismissed';
 
 export default function PasswordListColumn({
   vaultName,
@@ -15,6 +20,32 @@ export default function PasswordListColumn({
   onAddPassword,
   hideAddButton,
 }: PasswordListColumnProps) {
+  const [showExtensionPrompt, setShowExtensionPrompt] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const isComplete =
+      window.localStorage.getItem(EXTENSION_ONBOARDING_COMPLETE_KEY) === 'true';
+    const isDismissed =
+      window.localStorage.getItem(EXTENSION_ONBOARDING_DISMISSED_KEY) ===
+      'true';
+
+    setShowExtensionPrompt(!isComplete && !isDismissed);
+  }, []);
+
+  const handleDismissPrompt = () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem(
+        EXTENSION_ONBOARDING_DISMISSED_KEY,
+        'true',
+      );
+    }
+    setShowExtensionPrompt(false);
+  };
+
   return (
     <section className={styles.passwordListColumn}>
       <div className={styles.passwordListHeader}>
@@ -42,6 +73,33 @@ export default function PasswordListColumn({
             maxLength={30}
           />
         </div>
+        {showExtensionPrompt && (
+          <div className={styles.extensionPrompt}>
+            <div className={styles.extensionPromptBody}>
+              <p className={styles.extensionPromptTitle}>
+                Finish browser extension setup
+              </p>
+              <p className={styles.extensionPromptText}>
+                Follow the install guide, pair this browser, and confirm trusted
+                sites before you rely on save and autofill.
+              </p>
+              <Link
+                className={styles.extensionPromptLink}
+                to="/extension/onboarding"
+              >
+                Open onboarding guide
+              </Link>
+            </div>
+            <button
+              type="button"
+              className={styles.extensionPromptDismiss}
+              onClick={handleDismissPrompt}
+              aria-label="Dismiss extension onboarding prompt"
+            >
+              Dismiss
+            </button>
+          </div>
+        )}
       </div>
 
       <div className={styles.passwordListScroll}>
