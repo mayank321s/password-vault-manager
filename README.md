@@ -149,6 +149,13 @@ This example take some inspiration the [with-nextjs](https://github.com/vercel/t
 - `docs/devops/PLATFORM_RELIABILITY_BASELINE.md`
 - `docs/qa/MASTER_REGRESSION_RUNBOOK.md`
 
+## Launch Ops Docs
+
+- `docs/launch/GO_LIVE_READINESS_CHECKLIST.md`
+- `docs/launch/SUPPORT_RUNBOOK.md`
+- `docs/launch/ROLLOUT_AND_STABILIZATION_PLAN.md`
+- `docs/launch/KPI_MONITORING_PLAN.md`
+
 Learn more about the power of Turborepo:
 
 - [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
