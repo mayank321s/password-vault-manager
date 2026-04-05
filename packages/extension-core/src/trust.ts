@@ -31,12 +31,17 @@ export interface CredentialTrustAssessment {
 
 export function assessCredentialTrust(input: {
   readonly credential: ChromiumCredentialCandidate;
+  readonly target: ExtensionBrowserTarget;
   readonly pageUrl: string;
   readonly pairing: ExtensionPairingRecord | null;
   readonly browserId: string;
   readonly now?: string;
 }): CredentialTrustAssessment {
-  if (!input.pairing || input.pairing.browserId !== input.browserId) {
+  if (
+    !input.pairing ||
+    input.pairing.browserId !== input.browserId ||
+    input.pairing.target !== input.target
+  ) {
     return {
       allowAutofill: false,
       allowCredentialAccess: false,
@@ -123,6 +128,7 @@ export function createTrustedBrowserAutofillPlan(input: {
   for (const credential of input.credentials) {
     const assessment = assessCredentialTrust({
       credential,
+      target: input.target,
       pageUrl: input.pageUrl,
       pairing: input.pairing,
       browserId: input.browserId,

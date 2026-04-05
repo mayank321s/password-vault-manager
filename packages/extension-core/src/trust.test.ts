@@ -33,6 +33,7 @@ describe('extension trust controls', () => {
     expect(
       assessCredentialTrust({
         credential: candidate,
+        target: 'chromium',
         pageUrl: 'https://github.com/login',
         pairing,
         browserId: 'browser-2',
@@ -49,6 +50,7 @@ describe('extension trust controls', () => {
     expect(
       assessCredentialTrust({
         credential: candidate,
+        target: 'chromium',
         pageUrl: 'https://github.com/login',
         pairing,
         browserId: 'browser-1',
@@ -87,6 +89,7 @@ describe('extension trust controls', () => {
     expect(
       assessCredentialTrust({
         credential: candidate,
+        target: 'chromium',
         pageUrl: 'https://docs.github.com',
         pairing: {
           ...pairing,
@@ -99,6 +102,23 @@ describe('extension trust controls', () => {
       allowCredentialAccess: true,
       matchedOrigin: 'https://github.com/login',
       reason: 'subdomain-match',
+    });
+  });
+
+  it('rejects pairing records from a different browser family', () => {
+    expect(
+      assessCredentialTrust({
+        credential: candidate,
+        target: 'firefox',
+        pageUrl: 'https://github.com/login',
+        pairing,
+        browserId: 'browser-1',
+      }),
+    ).toEqual({
+      allowAutofill: false,
+      allowCredentialAccess: false,
+      matchedOrigin: null,
+      reason: 'unpaired-browser',
     });
   });
 });
