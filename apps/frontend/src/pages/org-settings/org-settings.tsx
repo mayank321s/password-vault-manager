@@ -2,6 +2,7 @@ import { Link, Navigate, useParams } from 'react-router-dom';
 import { useMemo } from 'react';
 import { useOrganizationContext } from '../../contexts/OrganizationContext';
 import { IdentitySettingsPanel } from './identity-settings-panel';
+import { PolicySettingsPanel } from './policy-settings-panel';
 import * as styles from './org-settings.css';
 
 const sections = [
@@ -107,6 +108,14 @@ export default function OrgSettingsPage() {
           {section === 'identity' && (
             <div className={styles.embeddedSection}>
               <IdentitySettingsPanel
+                organizationId={activeOrganizationId}
+                organizationType={activeOrganizationType}
+              />
+            </div>
+          )}
+          {section === 'policy' && (
+            <div className={styles.embeddedSection}>
+              <PolicySettingsPanel
                 organizationId={activeOrganizationId}
                 organizationType={activeOrganizationType}
               />

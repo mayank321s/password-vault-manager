@@ -72,6 +72,9 @@ export const API_V1_ROUTES = {
     invoices: `${API_V1_PREFIX}/billing/invoices`,
     portalSession: `${API_V1_PREFIX}/billing/portal-session`,
   },
+  policy: {
+    current: `${API_V1_PREFIX}/policies/current`,
+  },
   family: {
     createWorkspace: `${API_V1_PREFIX}/family/workspaces`,
     inviteMember: (organizationId: string) =>

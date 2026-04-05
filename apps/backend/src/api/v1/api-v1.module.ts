@@ -4,6 +4,7 @@ import { BillingModule } from './billing/billing.module';
 import { EmergencyAccessModule } from './emergency-access/emergency-access.module';
 import { FamilyModule } from './family/family.module';
 import { PasswordsModule } from './passwords/passwords.module';
+import { PoliciesModule } from './policies/policies.module';
 import { VaultsModule } from './vaults/vaults.module';
 import { UsersModule } from './users/users.module';
 import { SsoModule } from './sso/sso.module';
@@ -29,6 +30,7 @@ const API_V1_ROUTES: Routes = [
       { path: 'sso', module: SsoModule },
       { path: 'scim', module: ScimModule },
       { path: 'passwords', module: PasswordsModule },
+      { path: 'policies', module: PoliciesModule },
       { path: 'vaults', module: VaultsModule },
       { path: 'users', module: UsersModule },
     ],
@@ -45,6 +47,7 @@ const API_V1_ROUTES: Routes = [
     SsoModule,
     ScimModule,
     PasswordsModule,
+    PoliciesModule,
     VaultsModule,
     UsersModule,
     HealthModule,

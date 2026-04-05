@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -13,6 +14,7 @@ import { createHash } from 'crypto';
 import {
   OrganizationRepository,
   OrganizationMemberRepository,
+  OrganizationPolicyRepository,
   SessionRepository,
   SsoConfigurationRepository,
   SsoVerifiedDomainRepository,
@@ -66,6 +68,7 @@ export class AuthService {
     private readonly vaultMemberRepository: VaultMemberRepository,
     private readonly organizationRepository: OrganizationRepository,
     private readonly organizationMemberRepository: OrganizationMemberRepository,
+    private readonly organizationPolicyRepository: OrganizationPolicyRepository,
     private readonly sessionRepository: SessionRepository,
     private readonly ssoConfigurationRepository: SsoConfigurationRepository,
     private readonly ssoVerifiedDomainRepository: SsoVerifiedDomainRepository,
@@ -978,6 +981,20 @@ export class AuthService {
       await this.organizationMemberRepository.findActiveMembershipWithOrganization(
         user.id,
       );
+    const organizationPolicy =
+      organizationContext?.organization?.organizationType === OrganizationType.BUSINESS &&
+      organizationContext.organizationId
+      ? await this.organizationPolicyRepository.findOneBy({
+          organizationId: organizationContext.organizationId,
+        })
+      : null;
+
+    if (organizationPolicy?.requireMfa && !user.totpSecret) {
+      throw new ForbiddenException(
+        'Multi-factor authentication is required for this organization',
+      );
+    }
+
     const jwtTokenId = uuidv4();
     const payload = {
       sub: user.id,
@@ -987,12 +1004,31 @@ export class AuthService {
       organizationType: organizationContext?.organization?.organizationType ?? null,
     };
 
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: organizationPolicy
+        ? `${organizationPolicy.sessionTimeoutMinutes}m`
+        : undefined,
+    });
     const expiresAt = this.jwtService.decode<{ exp: number }>(accessToken)[
       'exp'
     ];
 
     await this.sequelize.transaction(async (transaction) => {
+      if (organizationPolicy) {
+        const activeSessions =
+          await this.sessionRepository.findActiveSessionsForUser(user.id);
+        const overflowCount =
+          activeSessions.length - (organizationPolicy.maxDevicesPerUser - 1);
+
+        if (overflowCount > 0) {
+          await this.sessionRepository.revokeSessionsByIds(
+            activeSessions.slice(0, overflowCount).map((session) => session.id),
+            new Date(),
+            transaction,
+          );
+        }
+      }
+
       await this.sessionRepository.create(
         {
           userId: user.id,

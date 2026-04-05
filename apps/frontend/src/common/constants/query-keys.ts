@@ -25,6 +25,12 @@ export const billingKeys = {
   invoices: ['billing', 'invoices'] as const,
 };
 
+export const policyKeys = {
+  all: ['policy'] as const,
+  current: (organizationId: string | null) =>
+    ['policy', 'current', organizationId ?? 'none'] as const,
+};
+
 export const familyKeys = {
   all: ['family'] as const,
   members: (organizationId: string) =>
