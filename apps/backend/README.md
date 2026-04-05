@@ -39,14 +39,9 @@ Update the database configuration in your `.env` file.
 ### 4. Run Migrations
 
 ```bash
-# Create the database (if not created manually)
-pnpm db:create
-
 # Run all migrations
-pnpm db:migrate
+pnpm migrate:up
 ```
-
-See [DATABASE_SETUP.md](./DATABASE_SETUP.md) for detailed database setup instructions.
 
 ## Development
 
@@ -111,36 +106,33 @@ src/
 ## Database Commands
 
 ```bash
-# Create database
-pnpm db:create
-
 # Run migrations
-pnpm db:migrate
+pnpm migrate:up
+
+# Verify there are no pending migrations
+pnpm migrate:check
 
 # Rollback last migration
-pnpm db:migrate:undo
+pnpm migrate:down
 
 # Generate new migration
-pnpm migration:generate create-users-table
-
-# Run seeders
-pnpm db:seed
-
-# Drop database (WARNING: destroys all data)
-pnpm db:drop
+pnpm migrate:create create-users-table
 ```
 
 ## Health Check Endpoints
 
 ```bash
 # Check application health
-curl http://localhost:3001/api/health
+curl http://localhost:3001/api/v1/health
 
 # Check database connection
-curl http://localhost:3001/api/health/db
+curl http://localhost:3001/api/v1/health/db
+
+# Check liveness
+curl http://localhost:3001/api/v1/health/live
 
 # Check readiness
-curl http://localhost:3001/api/health/ready
+curl http://localhost:3001/api/v1/health/ready
 ```
 
 ## Security Features

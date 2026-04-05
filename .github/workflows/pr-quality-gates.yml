@@ -3,7 +3,7 @@ name: PR Quality Gates
 on:
   pull_request:
     branches:
-      - main
+      - dev
 
 permissions:
   contents: read
