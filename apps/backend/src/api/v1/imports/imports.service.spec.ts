@@ -12,13 +12,20 @@ describe('ImportsService', () => {
 
     expect(result.parsedCount).toBe(1);
     expect(result.records[0]).toMatchObject({
+      rowNumber: 2,
       provider: 'generic_csv',
       title: 'GitHub',
       tags: ['dev', 'personal'],
       urls: ['https://github.com'],
+      reviewRequired: false,
       content: {
         type: 'password',
       },
+    });
+    expect(result.summary).toMatchObject({
+      issueCount: 0,
+      requiresReviewCount: 0,
+      duplicateGroupCount: 0,
     });
   });
 
@@ -30,10 +37,12 @@ describe('ImportsService', () => {
     });
 
     expect(result.records[0]).toMatchObject({
+      rowNumber: 2,
       provider: 'lastpass_csv',
       title: 'Example',
       folder: 'Shared',
       urls: ['https://example.com'],
+      reviewRequired: false,
       content: {
         type: 'password',
         fields: expect.arrayContaining([
@@ -58,7 +67,17 @@ describe('ImportsService', () => {
         'Archived item imported for review.',
         'Favorite flag preserved as metadata only.',
       ]),
+      reviewRequired: true,
     });
+    expect(result.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'archived_item', rowNumber: 2 }),
+        expect.objectContaining({
+          code: 'favorite_metadata_only',
+          rowNumber: 2,
+        }),
+      ]),
+    );
   });
 
   it('treats note-only imports as secure notes', () => {
@@ -68,6 +87,8 @@ describe('ImportsService', () => {
     });
 
     expect(result.records[0]).toMatchObject({
+      reviewRequired: true,
+      warnings: ['No password value found; review before import.'],
       content: {
         type: 'note',
         content: 'rotate keys monthly',
@@ -83,6 +104,7 @@ describe('ImportsService', () => {
     });
 
     expect(result.records[0]).toMatchObject({
+      rowNumber: 2,
       title: 'GitHub',
       urls: ['https://github.com'],
       content: {
@@ -93,5 +115,54 @@ describe('ImportsService', () => {
         ]),
       },
     });
+  });
+
+  it('flags duplicate records for remediation review', () => {
+    const result = service.parseImport('user-1', {
+      provider: 'generic_csv',
+      content: [
+        'title,url,username,password',
+        'GitHub,https://github.com,octocat,hunter2',
+        'GitHub,https://github.com,octocat,new-secret',
+      ].join('\n'),
+    });
+
+    expect(result.duplicateGroups).toHaveLength(1);
+    expect(result.duplicateGroups[0]).toMatchObject({
+      rowNumbers: [2, 3],
+    });
+    expect(result.records.map((record) => record.reviewRequired)).toEqual([
+      true,
+      true,
+    ]);
+    expect(result.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'duplicate_record', rowNumber: 2 }),
+        expect.objectContaining({ code: 'duplicate_record', rowNumber: 3 }),
+      ]),
+    );
+  });
+
+  it('reports malformed rows with structured remediation guidance', () => {
+    const result = service.parseImport('user-1', {
+      provider: 'generic_csv',
+      content: [
+        'title,url,username,password',
+        'Broken,https://github.com,"octocat,hunter2',
+      ].join('\n'),
+    });
+
+    expect(result.records).toHaveLength(0);
+    expect(result.skippedCount).toBe(1);
+    expect(result.summary.errorCount).toBe(1);
+    expect(result.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: 'malformed_row',
+          rowNumber: 2,
+          severity: 'error',
+        }),
+      ]),
+    );
   });
 });
