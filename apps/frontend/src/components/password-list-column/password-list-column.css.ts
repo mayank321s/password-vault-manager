@@ -62,6 +62,54 @@ export const searchWrapper = style({
   position: 'relative',
 });
 
+export const extensionPrompt = style({
+  marginTop: '0.85rem',
+  borderRadius: '14px',
+  border: '1px solid rgba(56, 189, 248, 0.35)',
+  background:
+    'linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 118, 110, 0.25))',
+  padding: '0.8rem',
+  display: 'grid',
+  gap: '0.75rem',
+});
+
+export const extensionPromptBody = style({
+  display: 'grid',
+  gap: '0.35rem',
+});
+
+export const extensionPromptTitle = style({
+  margin: 0,
+  color: '#f8fafc',
+  fontSize: '0.92rem',
+  fontWeight: 700,
+});
+
+export const extensionPromptText = style({
+  margin: 0,
+  color: '#cbd5e1',
+  fontSize: '0.82rem',
+  lineHeight: 1.5,
+});
+
+export const extensionPromptLink = style({
+  color: '#7dd3fc',
+  fontSize: '0.82rem',
+  fontWeight: 700,
+  textDecoration: 'none',
+});
+
+export const extensionPromptDismiss = style({
+  justifySelf: 'start',
+  border: '1px solid #334155',
+  backgroundColor: 'transparent',
+  color: '#94a3b8',
+  borderRadius: '999px',
+  padding: '0.3rem 0.7rem',
+  fontSize: '0.76rem',
+  cursor: 'pointer',
+});
+
 export const searchIcon = style({
   position: 'absolute',
   left: '0.625rem',

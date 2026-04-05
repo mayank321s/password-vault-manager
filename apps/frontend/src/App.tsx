@@ -29,6 +29,9 @@ const FamilyOnboardingPage = React.lazy(
 const EmergencyAccessPage = React.lazy(
   () => import('./pages/emergency-access/emergency-access'),
 );
+const ExtensionOnboardingPage = React.lazy(
+  () => import('./pages/extension-onboarding/extension-onboarding'),
+);
 const SsoCallbackPage = React.lazy(
   () => import('./pages/sso-callback/sso-callback'),
 );
@@ -116,6 +119,7 @@ function App() {
           element={<OrgSettingsPage />}
         />
         <Route path="/family/onboarding" element={<FamilyOnboardingPage />} />
+        <Route path="/extension/onboarding" element={<ExtensionOnboardingPage />} />
         <Route path="/settings/emergency-access" element={<EmergencyAccessPage />} />
         <Route
           path="/vaults/:vaultId/password/:passwordId"
