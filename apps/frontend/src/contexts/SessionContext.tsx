@@ -17,6 +17,7 @@ import {
   ReactNode,
 } from 'react';
 import { sessionManager } from '../services/session.service';
+import { broadcastExtensionSessionSnapshot } from '../services/extension-bridge.service';
 import { SessionState, UnlockResult } from '../types';
 import { clearAllExceptEmail } from '../lib/storage';
 
@@ -68,6 +69,12 @@ export function SessionProvider({ children }: SessionProviderProps) {
 
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    broadcastExtensionSessionSnapshot(sessionState).catch((error) => {
+      console.error('Failed to broadcast extension session state:', error);
+    });
+  }, [sessionState]);
 
   // Lock session
   const lockSession = useCallback(() => {
