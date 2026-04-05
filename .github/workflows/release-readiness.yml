@@ -35,7 +35,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Backend unit tests
-        run: pnpm --filter backend run test -- --runInBand --passWithNoTests
+        run: pnpm --filter backend exec jest --runInBand --passWithNoTests
 
       - name: Extension package tests
         run: pnpm --filter @repo/extension-core run test
