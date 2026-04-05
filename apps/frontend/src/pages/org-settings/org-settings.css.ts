@@ -151,6 +151,28 @@ export const fieldInput = style({
   },
 });
 
+export const toggleRow = style({
+  display: 'grid',
+  gridTemplateColumns: 'auto 1fr',
+  gap: '0.75rem',
+  alignItems: 'flex-start',
+});
+
+export const toggleInput = style({
+  width: '18px',
+  height: '18px',
+  marginTop: '0.15rem',
+  accentColor: '#7dd3fc',
+});
+
+export const inlineHint = style({
+  display: 'block',
+  marginTop: '0.25rem',
+  color: '#94a3b8',
+  fontSize: '0.825rem',
+  lineHeight: 1.5,
+});
+
 export const primaryButton = style({
   minHeight: '44px',
   border: 'none',

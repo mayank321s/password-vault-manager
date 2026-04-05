@@ -8,6 +8,7 @@ import { SsoConfig, ssoConfiguration } from 'src/config/sso.config';
 import { TotpConfig, totpConfiguration } from 'src/config/totp.config';
 import { Organization } from '../../../database/models/organization.model';
 import { OrganizationMember } from '../../../database/models/organization-member.model';
+import { OrganizationPolicy } from '../../../database/models/organization-policy.model';
 import { Session } from '../../../database/models/session.model';
 import { SsoConfiguration } from '../../../database/models/sso-configuration.model';
 import { SsoVerifiedDomain } from '../../../database/models/sso-verified-domain.model';
@@ -21,6 +22,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import {
   OrganizationRepository,
   OrganizationMemberRepository,
+  OrganizationPolicyRepository,
   SessionRepository,
   SsoConfigurationRepository,
   SsoVerifiedDomainRepository,
@@ -55,6 +57,7 @@ import { TotpService } from 'src/common/services/totp.service';
       Session,
       Organization,
       OrganizationMember,
+      OrganizationPolicy,
       SsoConfiguration,
       SsoVerifiedDomain,
     ]),
@@ -70,6 +73,7 @@ import { TotpService } from 'src/common/services/totp.service';
     VaultMemberRepository,
     OrganizationMemberRepository,
     OrganizationRepository,
+    OrganizationPolicyRepository,
     SessionRepository,
     SsoConfigurationRepository,
     SsoVerifiedDomainRepository,
