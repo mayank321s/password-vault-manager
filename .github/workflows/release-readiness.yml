@@ -139,6 +139,7 @@ jobs:
       JWT_EXPIRATION: 1h
       JWT_REFRESH_EXPIRATION: 7d
       ARGON2_SERVER_SALT: test-argon-salt-with-sufficient-length-for-ci
+      TOTP_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
       NODE_ENV: test
     steps:
       - name: Checkout
